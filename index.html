@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AVE CRM</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
 <style>
   :root {
     --navy: #1a2332;
@@ -46,7 +45,6 @@
     line-height: 1.5;
   }
 
-  /* ── LOGIN SCREEN ── */
   #login-screen {
     min-height: 100vh;
     display: flex;
@@ -66,666 +64,238 @@
   }
 
   .login-logo {
-    width: 56px;
-    height: 56px;
+    width: 56px; height: 56px;
     background: var(--navy);
     border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     margin: 0 auto 24px;
   }
 
-  .login-logo svg { width: 30px; height: 30px; }
-
-  .login-card h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 4px;
-    letter-spacing: -0.3px;
-  }
-
-  .login-card p {
-    color: var(--gray-600);
-    margin-bottom: 32px;
-    font-size: 13px;
-  }
+  .login-card h1 { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .login-card > p { color: var(--gray-600); margin-bottom: 32px; font-size: 13px; }
 
   .btn-microsoft {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 12px 20px;
-    background: var(--navy);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-    font-family: var(--font-ui);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 12px 20px;
+    background: var(--navy); color: var(--white);
+    border: none; border-radius: var(--radius);
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s; font-family: var(--font-ui);
   }
-
   .btn-microsoft:hover { background: var(--navy-light); }
+  .btn-microsoft:disabled { opacity: 0.6; cursor: not-allowed; }
+  .login-note { margin-top: 20px; font-size: 12px; color: var(--gray-400); }
+  .login-error { margin-top: 16px; font-size: 12px; color: var(--red); background: var(--red-pale); padding: 8px 12px; border-radius: 6px; display: none; }
 
-  .login-note {
-    margin-top: 20px;
-    font-size: 12px;
-    color: var(--gray-400);
-  }
-
-  /* ── APP LAYOUT ── */
   #app { display: none; min-height: 100vh; }
 
   .sidebar {
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    width: 220px;
-    background: var(--navy);
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
+    position: fixed; top: 0; left: 0; bottom: 0; width: 220px;
+    background: var(--navy); display: flex; flex-direction: column; z-index: 100;
   }
 
-  .sidebar-brand {
-    padding: 20px 18px 16px;
-    border-bottom: 1px solid var(--navy-light);
-  }
+  .sidebar-brand { padding: 20px 18px 16px; border-bottom: 1px solid var(--navy-light); }
+  .sidebar-brand .brand-name { font-size: 16px; font-weight: 700; color: var(--white); }
+  .sidebar-brand .brand-sub { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
 
-  .sidebar-brand .brand-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--white);
-    letter-spacing: -0.2px;
-  }
-
-  .sidebar-brand .brand-sub {
-    font-size: 11px;
-    color: var(--gray-400);
-    margin-top: 2px;
-  }
-
-  .sidebar-nav {
-    flex: 1;
-    padding: 12px 0;
-    overflow-y: auto;
-  }
+  .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
 
   .nav-section-label {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray-400);
-    padding: 12px 18px 6px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--gray-400); padding: 12px 18px 6px;
   }
 
   .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 18px;
-    color: #a8b8cc;
-    cursor: pointer;
-    border-radius: 0;
-    transition: all 0.12s;
-    font-size: 13.5px;
-    font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 18px; color: #a8b8cc; cursor: pointer;
+    transition: all 0.12s; font-size: 13.5px; font-weight: 500;
     border-left: 3px solid transparent;
-    text-decoration: none;
   }
-
   .nav-item:hover { color: var(--white); background: var(--navy-mid); }
-
-  .nav-item.active {
-    color: var(--white);
-    background: var(--navy-mid);
-    border-left-color: var(--copper);
-  }
-
+  .nav-item.active { color: var(--white); background: var(--navy-mid); border-left-color: var(--copper); }
   .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
   .nav-item.active svg { opacity: 1; }
 
   .nav-badge {
-    margin-left: auto;
-    background: var(--red);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 10px;
-    min-width: 18px;
-    text-align: center;
+    margin-left: auto; background: var(--red); color: white;
+    font-size: 10px; font-weight: 700; padding: 1px 6px;
+    border-radius: 10px; min-width: 18px; text-align: center;
   }
 
   .sidebar-user {
-    padding: 14px 18px;
-    border-top: 1px solid var(--navy-light);
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    padding: 14px 18px; border-top: 1px solid var(--navy-light);
+    display: flex; align-items: center; gap: 10px;
   }
 
   .user-avatar {
-    width: 32px;
-    height: 32px;
-    background: var(--copper);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: white;
-    flex-shrink: 0;
+    width: 32px; height: 32px; background: var(--copper); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
   }
 
   .user-info { flex: 1; min-width: 0; }
   .user-name { font-size: 12px; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .user-role { font-size: 11px; color: var(--gray-400); }
 
-  .btn-signout {
-    background: none;
-    border: none;
-    color: var(--gray-400);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-  }
+  .btn-signout { background: none; border: none; color: var(--gray-400); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; }
   .btn-signout:hover { color: var(--white); }
   .btn-signout svg { width: 14px; height: 14px; }
 
-  /* ── MAIN CONTENT ── */
-  .main {
-    margin-left: 220px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  .main { margin-left: 220px; min-height: 100vh; display: flex; flex-direction: column; }
 
   .topbar {
-    background: var(--white);
-    border-bottom: 1px solid var(--gray-200);
-    padding: 0 24px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    background: var(--white); border-bottom: 1px solid var(--gray-200);
+    padding: 0 24px; height: 56px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 50;
   }
 
-  .topbar-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--navy);
-    letter-spacing: -0.2px;
-  }
-
+  .topbar-title { font-size: 16px; font-weight: 700; color: var(--navy); }
   .topbar-actions { display: flex; gap: 8px; align-items: center; }
 
   .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.12s;
-    font-family: var(--font-ui);
-    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border: none; transition: all 0.12s; font-family: var(--font-ui);
   }
-
   .btn svg { width: 14px; height: 14px; }
-
   .btn-primary { background: var(--copper); color: white; }
   .btn-primary:hover { background: var(--copper-light); }
-
   .btn-secondary { background: var(--gray-100); color: var(--gray-800); border: 1px solid var(--gray-200); }
   .btn-secondary:hover { background: var(--gray-200); }
-
   .btn-ghost { background: none; color: var(--gray-600); }
   .btn-ghost:hover { background: var(--gray-100); color: var(--gray-800); }
-
-  .btn-danger { background: var(--red-pale); color: var(--red); }
-  .btn-danger:hover { background: var(--red); color: white; }
-
   .btn-sm { padding: 5px 10px; font-size: 12px; }
 
   .content { padding: 24px; flex: 1; }
 
-  /* ── STATS ROW ── */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
 
   .stat-card {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
+    background: var(--white); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200);
   }
-
   .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray-600); margin-bottom: 6px; }
   .stat-value { font-size: 28px; font-weight: 700; color: var(--navy); letter-spacing: -0.5px; line-height: 1; }
   .stat-sub { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
 
-  /* ── CARDS & TABLES ── */
-  .card {
-    background: var(--white);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
-    overflow: hidden;
-  }
-
-  .card-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--gray-200);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
+  .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); overflow: hidden; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
   .card-title { font-size: 14px; font-weight: 700; color: var(--navy); }
 
   .search-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--gray-100);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius);
-    padding: 7px 12px;
-    min-width: 220px;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--gray-100); border: 1px solid var(--gray-200);
+    border-radius: var(--radius); padding: 7px 12px; min-width: 220px;
   }
-
   .search-bar svg { width: 14px; height: 14px; color: var(--gray-400); flex-shrink: 0; }
-
-  .search-bar input {
-    border: none;
-    background: none;
-    font-size: 13px;
-    color: var(--gray-800);
-    outline: none;
-    width: 100%;
-    font-family: var(--font-ui);
-  }
-
+  .search-bar input { border: none; background: none; font-size: 13px; color: var(--gray-800); outline: none; width: 100%; font-family: var(--font-ui); }
   .search-bar input::placeholder { color: var(--gray-400); }
 
   table { width: 100%; border-collapse: collapse; }
-
-  th {
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--gray-600);
-    padding: 10px 16px;
-    background: var(--gray-50);
-    border-bottom: 1px solid var(--gray-200);
-    white-space: nowrap;
-  }
-
-  td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--gray-100);
-    vertical-align: middle;
-    font-size: 13.5px;
-  }
-
+  th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray-600); padding: 10px 16px; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; font-size: 13.5px; }
   tr:last-child td { border-bottom: none; }
-
   tr:hover td { background: var(--gray-50); cursor: pointer; }
+  .company-name, .contact-name { font-weight: 600; color: var(--navy); }
 
-  .company-name { font-weight: 600; color: var(--navy); }
-  .contact-name { font-weight: 600; color: var(--navy); }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
   .badge-green { background: var(--green-pale); color: var(--green); }
   .badge-amber { background: var(--amber-pale); color: var(--amber); }
   .badge-red { background: var(--red-pale); color: var(--red); }
   .badge-gray { background: var(--gray-100); color: var(--gray-600); }
   .badge-navy { background: #e8ecf2; color: var(--navy); }
 
-  .stub-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 7px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    background: var(--amber-pale);
-    color: var(--amber);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
+  .stub-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; background: var(--amber-pale); color: var(--amber); text-transform: uppercase; letter-spacing: 0.4px; }
 
-  /* ── DETAIL PANEL ── */
-  .panel-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    z-index: 200;
-    backdrop-filter: blur(2px);
-  }
-
+  .panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; backdrop-filter: blur(2px); }
   .panel-overlay.open { display: block; }
 
-  .panel {
-    position: fixed;
-    top: 0; right: 0; bottom: 0;
-    width: 520px;
-    background: var(--white);
-    box-shadow: var(--shadow-lg);
-    z-index: 201;
-    display: flex;
-    flex-direction: column;
-    transform: translateX(100%);
-    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
-  }
-
+  .panel { position: fixed; top: 0; right: 0; bottom: 0; width: 520px; background: var(--white); box-shadow: var(--shadow-lg); z-index: 201; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
   .panel.open { transform: translateX(0); }
 
-  .panel-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--gray-200);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-
-  .panel-title { font-size: 18px; font-weight: 700; color: var(--navy); letter-spacing: -0.3px; }
+  .panel-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0; }
+  .panel-title { font-size: 18px; font-weight: 700; color: var(--navy); }
   .panel-sub { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
 
-  .btn-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--gray-400);
-    padding: 4px;
-    border-radius: 4px;
-    display: flex;
-  }
+  .btn-close { background: none; border: none; cursor: pointer; color: var(--gray-400); padding: 4px; border-radius: 4px; display: flex; }
   .btn-close:hover { color: var(--gray-800); background: var(--gray-100); }
   .btn-close svg { width: 18px; height: 18px; }
 
   .panel-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
-
   .panel-section { margin-bottom: 24px; }
-  .panel-section-title {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray-400);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .panel-section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--gray-200);
-  }
+  .panel-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .panel-section-title::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
 
   .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .field-full { grid-column: 1 / -1; }
 
-  .field label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--gray-600);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-  }
-
-  .field input, .field select, .field textarea {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid var(--gray-200);
-    border-radius: 6px;
-    font-size: 13.5px;
-    color: var(--gray-800);
-    font-family: var(--font-ui);
-    background: var(--white);
-    transition: border-color 0.12s;
-    outline: none;
-  }
-
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--copper);
-    box-shadow: 0 0 0 3px rgba(184,115,51,0.1);
-  }
-
+  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .field input, .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13.5px; color: var(--gray-800); font-family: var(--font-ui); background: var(--white); transition: border-color 0.12s; outline: none; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--copper); box-shadow: 0 0 0 3px rgba(184,115,51,0.1); }
   .field textarea { resize: vertical; min-height: 72px; }
 
-  .panel-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--gray-200);
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    flex-shrink: 0;
-  }
+  .panel-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; }
 
-  /* ── ACTIVITY TIMELINE ── */
-  .timeline { display: flex; flex-direction: column; gap: 0; }
-
-  .timeline-item {
-    display: flex;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--gray-100);
-    position: relative;
-  }
-
+  .timeline { display: flex; flex-direction: column; }
+  .timeline-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
   .timeline-item:last-child { border-bottom: none; }
-
-  .timeline-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
+  .timeline-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
   .timeline-icon svg { width: 13px; height: 13px; }
   .timeline-icon.call { background: #e8ecf2; color: var(--navy); }
   .timeline-icon.email { background: var(--copper-pale); color: var(--copper); }
   .timeline-icon.order { background: var(--green-pale); color: var(--green); }
   .timeline-icon.note { background: var(--gray-100); color: var(--gray-600); }
   .timeline-icon.quote { background: var(--amber-pale); color: var(--amber); }
-
   .timeline-content { flex: 1; }
   .timeline-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .timeline-summary { font-size: 13.5px; font-weight: 500; color: var(--gray-800); }
   .timeline-date { font-size: 11px; color: var(--gray-400); white-space: nowrap; }
   .timeline-detail { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
 
-  .empty-state {
-    text-align: center;
-    padding: 32px 20px;
-    color: var(--gray-400);
-  }
-
+  .empty-state { text-align: center; padding: 32px 20px; color: var(--gray-400); }
   .empty-state svg { width: 36px; height: 36px; margin-bottom: 10px; opacity: 0.4; }
   .empty-state p { font-size: 13px; }
 
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 300;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(2px);
-  }
-
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
   .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 480px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-lg);
-    margin: 16px;
-  }
-
-  .modal-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--gray-200);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
+  .modal { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 480px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: var(--shadow-lg); margin: 16px; }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
   .modal-title { font-size: 16px; font-weight: 700; color: var(--navy); }
   .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
   .modal-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 8px; justify-content: flex-end; }
 
-  /* ── NEEDS REVIEW ── */
-  .review-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--gray-100);
-    transition: background 0.1s;
-  }
-
+  .review-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--gray-100); transition: background 0.1s; }
   .review-item:hover { background: var(--gray-50); }
   .review-item:last-child { border-bottom: none; }
-
-  .review-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
+  .review-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .review-icon svg { width: 15px; height: 15px; }
   .review-icon.stub { background: var(--amber-pale); color: var(--amber); }
   .review-icon.aged { background: var(--red-pale); color: var(--red); }
   .review-icon.unmatched { background: #e8ecf2; color: var(--navy); }
-
   .review-content { flex: 1; }
   .review-title { font-size: 13.5px; font-weight: 600; color: var(--gray-800); }
   .review-desc { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
   .review-date { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
 
-  /* ── TOAST ── */
-  #toast-container {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .toast {
-    background: var(--navy);
-    color: white;
-    padding: 12px 16px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: slideUp 0.2s ease;
-    max-width: 320px;
-  }
-
+  #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 500; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--navy); color: white; padding: 12px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 8px; animation: slideUp 0.2s ease; max-width: 320px; }
   .toast.success { background: var(--green); }
   .toast.error { background: var(--red); }
-
   .toast svg { width: 15px; height: 15px; flex-shrink: 0; }
+  @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-  @keyframes slideUp {
-    from { transform: translateY(10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  /* ── LOADING ── */
-  .spinner {
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--gray-200);
-    border-top-color: var(--copper);
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-    display: inline-block;
-  }
-
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--gray-200); border-top-color: var(--copper); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .loading-row td { text-align: center; padding: 32px; color: var(--gray-400); }
-
-  /* ── FOLLOW UP INDICATOR ── */
-  .followup-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 5px;
-  }
+  .followup-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; }
   .followup-dot.overdue { background: var(--red); }
   .followup-dot.soon { background: var(--amber); }
   .followup-dot.ok { background: var(--green); }
 
-  /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     .sidebar { width: 60px; }
-    .sidebar-brand .brand-name, .sidebar-brand .brand-sub,
-    .nav-section-label, .nav-item span, .user-info, .nav-badge { display: none; }
+    .sidebar-brand .brand-name, .sidebar-brand .brand-sub, .nav-section-label, .nav-item span, .user-info, .nav-badge { display: none; }
     .nav-item { justify-content: center; padding: 12px; }
     .nav-item svg { width: 18px; height: 18px; }
     .main { margin-left: 60px; }
@@ -736,25 +306,22 @@
 
   .page { display: none; }
   .page.active { display: block; }
-
   .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
-
   @media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
       </svg>
     </div>
     <h1>AVE CRM</h1>
     <p>Audio Video Electric — Account Management</p>
-    <button class="btn-microsoft" onclick="signIn()">
+    <button class="btn-microsoft" id="login-btn" onclick="signIn()">
       <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
         <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
         <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
@@ -763,13 +330,12 @@
       </svg>
       Sign in with Microsoft 365
     </button>
+    <div class="login-error" id="login-error"></div>
     <p class="login-note">Access restricted to authorized AVE personnel</p>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
-  <!-- Sidebar -->
   <nav class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-name">AVE CRM</div>
@@ -817,7 +383,6 @@
     </div>
   </nav>
 
-  <!-- Main -->
   <div class="main">
     <div class="topbar">
       <div class="topbar-title" id="page-title">Dashboard</div>
@@ -825,7 +390,6 @@
     </div>
     <div class="content">
 
-      <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="stats-row">
           <div class="stat-card">
@@ -851,25 +415,16 @@
         </div>
         <div class="two-col">
           <div class="card">
-            <div class="card-header">
-              <div class="card-title">Follow-ups Due</div>
-            </div>
-            <div id="followup-list">
-              <div class="loading-row"><table><tr><td><div class="spinner"></div></td></tr></table></div>
-            </div>
+            <div class="card-header"><div class="card-title">Follow-ups Due</div></div>
+            <div id="followup-list"><div style="text-align:center;padding:32px"><div class="spinner"></div></div></div>
           </div>
           <div class="card">
-            <div class="card-header">
-              <div class="card-title">Recent Activity</div>
-            </div>
-            <div id="recent-activity" style="padding:0 16px">
-              <div class="loading-row" style="text-align:center;padding:32px;color:var(--gray-400)"><div class="spinner"></div></div>
-            </div>
+            <div class="card-header"><div class="card-title">Recent Activity</div></div>
+            <div id="recent-activity" style="padding:0 16px"><div style="text-align:center;padding:32px"><div class="spinner"></div></div></div>
           </div>
         </div>
       </div>
 
-      <!-- COMPANIES -->
       <div class="page" id="page-companies">
         <div class="card">
           <div class="card-header">
@@ -879,25 +434,11 @@
               <input type="text" placeholder="Search companies..." id="company-search" oninput="filterCompanies()">
             </div>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Company</th>
-                <th>Phone</th>
-                <th>City / State</th>
-                <th>Type</th>
-                <th>Last Activity</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="companies-tbody">
-              <tr class="loading-row"><td colspan="6"><div class="spinner"></div></td></tr>
-            </tbody>
-          </table>
+          <table><thead><tr><th>Company</th><th>Phone</th><th>City / State</th><th>Type</th><th>Contacts</th><th>Status</th></tr></thead>
+          <tbody id="companies-tbody"><tr><td colspan="6" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody></table>
         </div>
       </div>
 
-      <!-- CONTACTS -->
       <div class="page" id="page-contacts">
         <div class="card">
           <div class="card-header">
@@ -907,82 +448,34 @@
               <input type="text" placeholder="Search contacts..." id="contact-search" oninput="filterContacts()">
             </div>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Company</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Follow-up</th>
-                <th>Owner</th>
-              </tr>
-            </thead>
-            <tbody id="contacts-tbody">
-              <tr class="loading-row"><td colspan="6"><div class="spinner"></div></td></tr>
-            </tbody>
-          </table>
+          <table><thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Phone</th><th>Follow-up</th><th>Owner</th></tr></thead>
+          <tbody id="contacts-tbody"><tr><td colspan="6" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody></table>
         </div>
       </div>
 
-      <!-- NEEDS REVIEW -->
       <div class="page" id="page-review">
         <div class="card">
           <div class="card-header">
             <div class="card-title">Needs Review</div>
             <span class="badge badge-amber" id="review-count">Loading...</span>
           </div>
-          <div id="review-list">
-            <div style="text-align:center;padding:32px;color:var(--gray-400)"><div class="spinner"></div></div>
-          </div>
+          <div id="review-list"><div style="text-align:center;padding:32px"><div class="spinner"></div></div></div>
         </div>
       </div>
 
-      <!-- QUOTES -->
       <div class="page" id="page-quotes">
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">Quotes</div>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Quote #</th>
-                <th>Company</th>
-                <th>Contact</th>
-                <th>Spec</th>
-                <th>Date</th>
-                <th>Price</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="quotes-tbody">
-              <tr class="loading-row"><td colspan="7"><div class="spinner"></div></td></tr>
-            </tbody>
-          </table>
+          <div class="card-header"><div class="card-title">Quotes</div></div>
+          <table><thead><tr><th>Quote #</th><th>Company</th><th>Contact</th><th>Spec</th><th>Date</th><th>Price</th><th>Status</th></tr></thead>
+          <tbody id="quotes-tbody"><tr><td colspan="7" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody></table>
         </div>
       </div>
 
-      <!-- SUPPLIERS -->
       <div class="page" id="page-suppliers">
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">Supplier List</div>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Supplier</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Website</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="suppliers-tbody">
-              <tr class="loading-row"><td colspan="5"><div class="spinner"></div></td></tr>
-            </tbody>
-          </table>
+          <div class="card-header"><div class="card-title">Supplier List</div></div>
+          <table><thead><tr><th>Supplier</th><th>Phone</th><th>Email</th><th>Website</th><th>Status</th></tr></thead>
+          <tbody id="suppliers-tbody"><tr><td colspan="5" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody></table>
         </div>
       </div>
 
@@ -990,70 +483,37 @@
   </div>
 </div>
 
-<!-- COMPANY DETAIL PANEL -->
+<!-- COMPANY PANEL -->
 <div class="panel-overlay" id="company-overlay" onclick="closeCompanyPanel()"></div>
 <div class="panel" id="company-panel">
   <div class="panel-header">
-    <div>
-      <div class="panel-title" id="cp-name">Company</div>
-      <div class="panel-sub" id="cp-sub"></div>
-    </div>
-    <button class="btn-close" onclick="closeCompanyPanel()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <div><div class="panel-title" id="cp-name">Company</div><div class="panel-sub" id="cp-sub"></div></div>
+    <button class="btn-close" onclick="closeCompanyPanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div class="panel-body">
     <div class="panel-section">
       <div class="panel-section-title">Company Details</div>
       <div class="field-grid">
-        <div class="field field-full">
-          <label>Company Name</label>
-          <input type="text" id="cp-field-name">
-        </div>
-        <div class="field">
-          <label>Phone</label>
-          <input type="text" id="cp-field-phone">
-        </div>
-        <div class="field">
-          <label>Customer Type</label>
-          <select id="cp-field-type">
-            <option value="">— Select —</option>
-            <option>Contractor</option>
-            <option>Integrator</option>
-            <option>Reseller</option>
-            <option>Distributor</option>
-            <option>End User</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>City</label>
-          <input type="text" id="cp-field-city">
-        </div>
-        <div class="field">
-          <label>State</label>
-          <input type="text" id="cp-field-state">
-        </div>
-        <div class="field field-full">
-          <label>Notes</label>
-          <textarea id="cp-field-notes" rows="3"></textarea>
-        </div>
+        <div class="field field-full"><label>Company Name</label><input type="text" id="cp-field-name"></div>
+        <div class="field"><label>Phone</label><input type="text" id="cp-field-phone"></div>
+        <div class="field"><label>Customer Type</label><select id="cp-field-type"><option value="">— Select —</option><option>Contractor</option><option>Integrator</option><option>Reseller</option><option>Distributor</option><option>End User</option><option>Other</option></select></div>
+        <div class="field"><label>City</label><input type="text" id="cp-field-city"></div>
+        <div class="field"><label>State</label><input type="text" id="cp-field-state"></div>
+        <div class="field field-full"><label>Notes</label><textarea id="cp-field-notes" rows="3"></textarea></div>
       </div>
     </div>
     <div class="panel-section">
       <div class="panel-section-title">Contacts</div>
       <div id="cp-contacts-list"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="addContactForCompany()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Contact
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Contact
       </button>
     </div>
     <div class="panel-section">
       <div class="panel-section-title">Activity Timeline</div>
       <div id="cp-timeline"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="openAddNoteModal('company')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Note
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Note
       </button>
     </div>
     <div class="panel-section">
@@ -1067,73 +527,34 @@
   </div>
 </div>
 
-<!-- CONTACT DETAIL PANEL -->
+<!-- CONTACT PANEL -->
 <div class="panel-overlay" id="contact-overlay" onclick="closeContactPanel()"></div>
 <div class="panel" id="contact-panel">
   <div class="panel-header">
-    <div>
-      <div class="panel-title" id="ct-name">Contact</div>
-      <div class="panel-sub" id="ct-sub"></div>
-    </div>
-    <button class="btn-close" onclick="closeContactPanel()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <div><div class="panel-title" id="ct-name">Contact</div><div class="panel-sub" id="ct-sub"></div></div>
+    <button class="btn-close" onclick="closeContactPanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div class="panel-body">
     <div class="panel-section">
       <div class="panel-section-title">Contact Details</div>
       <div class="field-grid">
-        <div class="field">
-          <label>First Name</label>
-          <input type="text" id="ct-field-first">
-        </div>
-        <div class="field">
-          <label>Last Name</label>
-          <input type="text" id="ct-field-last">
-        </div>
-        <div class="field field-full">
-          <label>Company</label>
-          <select id="ct-field-company"></select>
-        </div>
-        <div class="field">
-          <label>Title</label>
-          <input type="text" id="ct-field-title">
-        </div>
-        <div class="field">
-          <label>Owner</label>
-          <select id="ct-field-owner">
-            <option value="Jeff">Jeff</option>
-            <option value="Salesperson">Salesperson</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="ct-field-email">
-        </div>
-        <div class="field">
-          <label>Phone</label>
-          <input type="text" id="ct-field-phone">
-        </div>
-        <div class="field">
-          <label>Phone (Secondary)</label>
-          <input type="text" id="ct-field-phone2">
-        </div>
-        <div class="field">
-          <label>Follow-up Date</label>
-          <input type="date" id="ct-field-followup">
-        </div>
-        <div class="field field-full">
-          <label>Follow-up Note</label>
-          <input type="text" id="ct-field-followup-note" placeholder="What to discuss...">
-        </div>
+        <div class="field"><label>First Name</label><input type="text" id="ct-field-first"></div>
+        <div class="field"><label>Last Name</label><input type="text" id="ct-field-last"></div>
+        <div class="field field-full"><label>Company</label><select id="ct-field-company"></select></div>
+        <div class="field"><label>Title</label><input type="text" id="ct-field-title"></div>
+        <div class="field"><label>Owner</label><select id="ct-field-owner"><option value="Jeff">Jeff</option><option value="Salesperson">Salesperson</option></select></div>
+        <div class="field"><label>Email</label><input type="email" id="ct-field-email"></div>
+        <div class="field"><label>Phone</label><input type="text" id="ct-field-phone"></div>
+        <div class="field"><label>Phone (Secondary)</label><input type="text" id="ct-field-phone2"></div>
+        <div class="field"><label>Follow-up Date</label><input type="date" id="ct-field-followup"></div>
+        <div class="field field-full"><label>Follow-up Note</label><input type="text" id="ct-field-followup-note" placeholder="What to discuss..."></div>
       </div>
     </div>
     <div class="panel-section">
       <div class="panel-section-title">Activity Timeline</div>
       <div id="ct-timeline"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="openAddNoteModal('contact')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Note
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Note
       </button>
     </div>
   </div>
@@ -1143,250 +564,221 @@
   </div>
 </div>
 
-<!-- ADD NOTE MODAL -->
+<!-- NOTE MODAL -->
 <div class="modal-overlay" id="note-modal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Add Note</div>
-      <button class="btn-close" onclick="closeModal('note-modal')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="field" style="margin-bottom:12px">
-        <label>Note</label>
-        <textarea id="note-text" rows="4" placeholder="Enter your note..."></textarea>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('note-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Add Note</div><button class="btn-close" onclick="closeModal('note-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body"><div class="field"><label>Note</label><textarea id="note-text" rows="4" placeholder="Enter your note..."></textarea></div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('note-modal')">Cancel</button><button class="btn btn-primary" onclick="saveNote()">Save Note</button></div>
   </div>
 </div>
 
 <!-- ADD COMPANY MODAL -->
 <div class="modal-overlay" id="add-company-modal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Add Company</div>
-      <button class="btn-close" onclick="closeModal('add-company-modal')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Add Company</div><button class="btn-close" onclick="closeModal('add-company-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <div class="field-grid">
-        <div class="field field-full">
-          <label>Company Name *</label>
-          <input type="text" id="new-company-name" placeholder="As it appears in QuickBooks">
-        </div>
-        <div class="field">
-          <label>Phone</label>
-          <input type="text" id="new-company-phone">
-        </div>
-        <div class="field">
-          <label>Customer Type</label>
-          <select id="new-company-type">
-            <option value="">— Select —</option>
-            <option>Contractor</option>
-            <option>Integrator</option>
-            <option>Reseller</option>
-            <option>Distributor</option>
-            <option>End User</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>City</label>
-          <input type="text" id="new-company-city">
-        </div>
-        <div class="field">
-          <label>State</label>
-          <input type="text" id="new-company-state">
-        </div>
+        <div class="field field-full"><label>Company Name *</label><input type="text" id="new-company-name" placeholder="As it appears in QuickBooks"></div>
+        <div class="field"><label>Phone</label><input type="text" id="new-company-phone"></div>
+        <div class="field"><label>Customer Type</label><select id="new-company-type"><option value="">— Select —</option><option>Contractor</option><option>Integrator</option><option>Reseller</option><option>Distributor</option><option>End User</option><option>Other</option></select></div>
+        <div class="field"><label>City</label><input type="text" id="new-company-city"></div>
+        <div class="field"><label>State</label><input type="text" id="new-company-state"></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('add-company-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNewCompany()">Add Company</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('add-company-modal')">Cancel</button><button class="btn btn-primary" onclick="saveNewCompany()">Add Company</button></div>
   </div>
 </div>
 
 <!-- ADD CONTACT MODAL -->
 <div class="modal-overlay" id="add-contact-modal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Add Contact</div>
-      <button class="btn-close" onclick="closeModal('add-contact-modal')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Add Contact</div><button class="btn-close" onclick="closeModal('add-contact-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <div class="field-grid">
-        <div class="field">
-          <label>First Name</label>
-          <input type="text" id="new-contact-first">
-        </div>
-        <div class="field">
-          <label>Last Name</label>
-          <input type="text" id="new-contact-last">
-        </div>
-        <div class="field field-full">
-          <label>Company</label>
-          <select id="new-contact-company"></select>
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="new-contact-email">
-        </div>
-        <div class="field">
-          <label>Phone</label>
-          <input type="text" id="new-contact-phone">
-        </div>
-        <div class="field">
-          <label>Title</label>
-          <input type="text" id="new-contact-title">
-        </div>
-        <div class="field">
-          <label>Owner</label>
-          <select id="new-contact-owner">
-            <option value="Jeff">Jeff</option>
-            <option value="Salesperson">Salesperson</option>
-          </select>
-        </div>
+        <div class="field"><label>First Name</label><input type="text" id="new-contact-first"></div>
+        <div class="field"><label>Last Name</label><input type="text" id="new-contact-last"></div>
+        <div class="field field-full"><label>Company</label><select id="new-contact-company"></select></div>
+        <div class="field"><label>Email</label><input type="email" id="new-contact-email"></div>
+        <div class="field"><label>Phone</label><input type="text" id="new-contact-phone"></div>
+        <div class="field"><label>Title</label><input type="text" id="new-contact-title"></div>
+        <div class="field"><label>Owner</label><select id="new-contact-owner"><option value="Jeff">Jeff</option><option value="Salesperson">Salesperson</option></select></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('add-contact-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNewContact()">Add Contact</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('add-contact-modal')">Cancel</button><button class="btn btn-primary" onclick="saveNewContact()">Add Contact</button></div>
   </div>
 </div>
 
 <!-- ADD SUPPLIER MODAL -->
 <div class="modal-overlay" id="add-supplier-modal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Add Supplier</div>
-      <button class="btn-close" onclick="closeModal('add-supplier-modal')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Add Supplier</div><button class="btn-close" onclick="closeModal('add-supplier-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <div class="field-grid">
-        <div class="field field-full">
-          <label>Supplier Name *</label>
-          <input type="text" id="new-supplier-name">
-        </div>
-        <div class="field">
-          <label>Phone</label>
-          <input type="text" id="new-supplier-phone">
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="new-supplier-email">
-        </div>
-        <div class="field field-full">
-          <label>Website</label>
-          <input type="text" id="new-supplier-website">
-        </div>
-        <div class="field field-full">
-          <label>Notes</label>
-          <textarea id="new-supplier-notes" rows="2"></textarea>
-        </div>
+        <div class="field field-full"><label>Supplier Name *</label><input type="text" id="new-supplier-name"></div>
+        <div class="field"><label>Phone</label><input type="text" id="new-supplier-phone"></div>
+        <div class="field"><label>Email</label><input type="email" id="new-supplier-email"></div>
+        <div class="field field-full"><label>Website</label><input type="text" id="new-supplier-website"></div>
+        <div class="field field-full"><label>Notes</label><textarea id="new-supplier-notes" rows="2"></textarea></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('add-supplier-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNewSupplier()">Add Supplier</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('add-supplier-modal')">Cancel</button><button class="btn btn-primary" onclick="saveNewSupplier()">Add Supplier</button></div>
   </div>
 </div>
 
-<!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
 <script>
 // ── CONFIG ──
 const PROXY = 'https://ave-crm-proxy.jeffdbova.workers.dev';
-const MSAL_CONFIG = {
-  clientId: 'f4c19310-ad35-41ef-8f38-206d57e123fc',
-  tenantId: '2d8d0475-ac74-4a3b-acc6-b0e8fa187681',
-  redirectUri: 'https://jeffdbova.github.io/ave-crm/'
-};
+const CLIENT_ID = 'f4c19310-ad35-41ef-8f38-206d57e123fc';
+const TENANT_ID = '2d8d0475-ac74-4a3b-acc6-b0e8fa187681';
+const REDIRECT_URI = 'https://jeffdbova.github.io/ave-crm/';
+const SCOPES = ['openid', 'profile', 'email', 'User.Read'];
 
 // ── STATE ──
 let currentUser = null;
-let authToken = null;
 let allCompanies = [];
 let allContacts = [];
 let currentCompanyId = null;
 let currentContactId = null;
 let noteTargetType = null;
 
-// ── SIMPLE MSAL-LIKE AUTH using redirect flow ──
-function getAuthUrl() {
-  const params = new URLSearchParams({
-    client_id: MSAL_CONFIG.clientId,
-    response_type: 'token',
-    redirect_uri: MSAL_CONFIG.redirectUri,
-    scope: 'openid profile email User.Read',
-    response_mode: 'fragment',
-    nonce: Math.random().toString(36).substring(2)
-  });
-  return `https://login.microsoftonline.com/${MSAL_CONFIG.tenantId}/oauth2/v2.0/authorize?${params}`;
+// ── PKCE HELPERS ──
+function generateCodeVerifier() {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode(...array)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
 
-function signIn() {
-  sessionStorage.setItem('ave_pre_auth', window.location.href);
-  window.location.href = getAuthUrl();
+async function generateCodeChallenge(verifier) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+// ── AUTH ──
+async function signIn() {
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.textContent = 'Redirecting...';
+
+  const verifier = generateCodeVerifier();
+  const challenge = await generateCodeChallenge(verifier);
+  const state = Math.random().toString(36).substring(2);
+
+  sessionStorage.setItem('pkce_verifier', verifier);
+  sessionStorage.setItem('pkce_state', state);
+
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    response_type: 'code',
+    redirect_uri: REDIRECT_URI,
+    scope: SCOPES.join(' '),
+    response_mode: 'query',
+    state,
+    code_challenge: challenge,
+    code_challenge_method: 'S256'
+  });
+
+  window.location.href = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/authorize?${params}`;
+}
+
+async function handleAuthCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  const error = params.get('error');
+
+  if (error) {
+    showLoginError(params.get('error_description') || error);
+    return false;
+  }
+
+  if (!code) return false;
+
+  const savedState = sessionStorage.getItem('pkce_state');
+  if (state !== savedState) {
+    showLoginError('Security state mismatch. Please try again.');
+    return false;
+  }
+
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  if (!verifier) {
+    showLoginError('Missing auth verifier. Please try again.');
+    return false;
+  }
+
+  // Exchange code for token via Cloudflare Worker
+  try {
+    const resp = await fetch(`${PROXY}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, verifier, redirect_uri: REDIRECT_URI })
+    });
+
+    if (!resp.ok) throw new Error('Token exchange failed');
+    const data = await resp.json();
+
+    if (data.error) throw new Error(data.error_description || data.error);
+
+    // Parse user from id_token
+    const idToken = data.id_token;
+    const payload = JSON.parse(atob(idToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+
+    currentUser = {
+      name: payload.name || payload.preferred_username,
+      email: payload.preferred_username || payload.email,
+      token: data.access_token
+    };
+
+    sessionStorage.setItem('ave_user', JSON.stringify(currentUser));
+    sessionStorage.removeItem('pkce_verifier');
+    sessionStorage.removeItem('pkce_state');
+
+    // Clean URL
+    window.history.replaceState(null, '', REDIRECT_URI);
+    return true;
+
+  } catch(e) {
+    showLoginError('Sign-in failed: ' + e.message);
+    return false;
+  }
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  const btn = document.getElementById('login-btn');
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg> Sign in with Microsoft 365`;
 }
 
 function signOut() {
-  sessionStorage.removeItem('ave_token');
   sessionStorage.removeItem('ave_user');
-  window.location.href = `https://login.microsoftonline.com/${MSAL_CONFIG.tenantId}/oauth2/v2.0/logout?post_logout_redirect_uri=${encodeURIComponent(MSAL_CONFIG.redirectUri)}`;
+  window.location.href = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/logout?post_logout_redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
 }
 
-function parseTokenFromHash() {
-  const hash = window.location.hash.substring(1);
-  if (!hash) return null;
-  const params = new URLSearchParams(hash);
-  if (!params.get('access_token')) return null;
-  const token = params.get('access_token');
-  // Parse user from id_token if present, else from access token
-  const idToken = params.get('id_token') || token;
-  try {
-    const payload = JSON.parse(atob(idToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-    return { token, user: { name: payload.name || payload.preferred_username || 'User', email: payload.preferred_username || payload.email || '' }};
-  } catch(e) {
-    return { token, user: { name: 'AVE User', email: '' }};
+async function checkAuth() {
+  // Check for auth callback
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('code')) {
+    const success = await handleAuthCallback();
+    if (success) { initApp(); return; }
+    document.getElementById('login-screen').style.display = 'flex';
+    return;
   }
-}
 
-function checkAuth() {
-  // Check for token in URL hash (post-redirect)
-  const fromHash = parseTokenFromHash();
-  if (fromHash) {
-    authToken = fromHash.token;
-    currentUser = fromHash.user;
-    sessionStorage.setItem('ave_token', authToken);
-    sessionStorage.setItem('ave_user', JSON.stringify(currentUser));
-    window.history.replaceState(null, '', window.location.pathname);
+  // Check session
+  const stored = sessionStorage.getItem('ave_user');
+  if (stored) {
+    currentUser = JSON.parse(stored);
     initApp();
     return;
   }
-  // Check session storage
-  const storedToken = sessionStorage.getItem('ave_token');
-  const storedUser = sessionStorage.getItem('ave_user');
-  if (storedToken && storedUser) {
-    authToken = storedToken;
-    currentUser = JSON.parse(storedUser);
-    initApp();
-    return;
-  }
-  // Show login
+
   document.getElementById('login-screen').style.display = 'flex';
 }
 
@@ -1395,38 +787,23 @@ async function api(path, options = {}) {
   const url = `${PROXY}/supabase${path}`;
   const res = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'Prefer': options.prefer || '',
-      ...(options.headers || {})
-    }
+    headers: { 'Content-Type': 'application/json', 'Prefer': options.prefer || '', ...(options.headers||{}) }
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
-  }
+  if (!res.ok) { const err = await res.text(); throw new Error(err); }
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }
 
-async function apiGet(path) {
-  return api(path, { method: 'GET' });
-}
-
-async function apiPost(path, body) {
-  return api(path, { method: 'POST', body: JSON.stringify(body), prefer: 'return=representation' });
-}
-
-async function apiPatch(path, body) {
-  return api(path, { method: 'PATCH', body: JSON.stringify(body), prefer: 'return=representation' });
-}
+async function apiGet(path) { return api(path, { method: 'GET' }); }
+async function apiPost(path, body) { return api(path, { method: 'POST', body: JSON.stringify(body), prefer: 'return=representation' }); }
+async function apiPatch(path, body) { return api(path, { method: 'PATCH', body: JSON.stringify(body), prefer: 'return=representation' }); }
 
 // ── INIT ──
 async function initApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
 
-  const initials = (currentUser.name || 'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  const initials = (currentUser.name||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('user-name').textContent = currentUser.name || currentUser.email;
 
@@ -1435,47 +812,37 @@ async function initApp() {
   loadReviewBadge();
 }
 
-// ── DATA LOADING ──
 async function loadCompanies() {
-  try {
-    allCompanies = await apiGet('/companies?order=name.asc&limit=500') || [];
-  } catch(e) { allCompanies = []; }
+  try { allCompanies = await apiGet('/companies?order=name.asc&limit=500') || []; } catch(e) { allCompanies = []; }
 }
 
 async function loadContacts() {
-  try {
-    allContacts = await apiGet('/contacts?order=last_name.asc&limit=1000') || [];
-  } catch(e) { allContacts = []; }
+  try { allContacts = await apiGet('/contacts?order=last_name.asc&limit=1000') || []; } catch(e) { allContacts = []; }
 }
 
 // ── DASHBOARD ──
 async function loadDashboard() {
   document.getElementById('stat-companies').textContent = allCompanies.length;
   document.getElementById('stat-contacts').textContent = allContacts.length;
-
   const today = new Date().toISOString().split('T')[0];
   const due = allContacts.filter(c => c.follow_up_date && c.follow_up_date <= today);
   document.getElementById('stat-followups').textContent = due.length;
-
   renderFollowups(due);
   loadRecentActivity();
 }
 
 function renderFollowups(contacts) {
   const el = document.getElementById('followup-list');
-  if (!contacts.length) {
-    el.innerHTML = '<div class="empty-state"><p>No follow-ups due — you\'re all caught up.</p></div>';
-    return;
-  }
+  if (!contacts.length) { el.innerHTML = '<div class="empty-state"><p>No follow-ups due — you\'re all caught up.</p></div>'; return; }
   const today = new Date().toISOString().split('T')[0];
   el.innerHTML = `<table><tbody>${contacts.slice(0,10).map(c => {
     const company = allCompanies.find(co => co.id === c.company_id);
     const overdue = c.follow_up_date < today;
     return `<tr onclick="openContact('${c.id}')">
-      <td><span class="followup-dot ${overdue ? 'overdue' : 'soon'}"></span><span class="contact-name">${c.first_name || ''} ${c.last_name || ''}</span></td>
-      <td style="color:var(--gray-600)">${company ? company.name : '—'}</td>
-      <td><span class="badge ${overdue ? 'badge-red' : 'badge-amber'}">${overdue ? 'Overdue' : 'Due today'}</span></td>
-      <td style="color:var(--gray-600);font-size:12px">${c.follow_up_note || ''}</td>
+      <td><span class="followup-dot ${overdue?'overdue':'soon'}"></span><span class="contact-name">${c.first_name||''} ${c.last_name||''}</span></td>
+      <td style="color:var(--gray-600)">${company?company.name:'—'}</td>
+      <td><span class="badge ${overdue?'badge-red':'badge-amber'}">${overdue?'Overdue':'Due today'}</span></td>
+      <td style="color:var(--gray-600);font-size:12px">${c.follow_up_note||''}</td>
     </tr>`;
   }).join('')}</tbody></table>`;
 }
@@ -1484,68 +851,49 @@ async function loadRecentActivity() {
   const el = document.getElementById('recent-activity');
   try {
     const activities = await apiGet('/activities?order=occurred_at.desc&limit=8') || [];
-    if (!activities.length) {
-      el.innerHTML = '<div class="empty-state"><p>No activity logged yet.</p></div>';
-      return;
-    }
-    el.innerHTML = `<div class="timeline">${activities.map(a => renderTimelineItem(a)).join('')}</div>`;
-  } catch(e) {
-    el.innerHTML = '<div class="empty-state"><p>Could not load activity.</p></div>';
-  }
+    el.innerHTML = activities.length ? `<div class="timeline">${activities.map(renderTimelineItem).join('')}</div>` : '<div class="empty-state"><p>No activity logged yet.</p></div>';
+  } catch(e) { el.innerHTML = '<div class="empty-state"><p>Could not load activity.</p></div>'; }
 }
 
-// ── COMPANIES PAGE ──
+// ── COMPANIES ──
 function renderCompanies() {
   const tbody = document.getElementById('companies-tbody');
-  const q = (document.getElementById('company-search')?.value || '').toLowerCase();
+  const q = (document.getElementById('company-search')?.value||'').toLowerCase();
   const filtered = allCompanies.filter(c => !q || c.name.toLowerCase().includes(q));
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--gray-400)">No companies found</td></tr>`;
-    return;
-  }
+  if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--gray-400)">No companies found</td></tr>`; return; }
   tbody.innerHTML = filtered.map(c => {
-    const contactCount = allContacts.filter(ct => ct.company_id === c.id).length;
+    const cc = allContacts.filter(ct => ct.company_id === c.id).length;
     return `<tr onclick="openCompany('${c.id}')">
-      <td><span class="company-name">${c.name}</span>${c.is_stub ? ' <span class="stub-badge">Stub</span>' : ''}</td>
-      <td>${c.phone || '—'}</td>
-      <td>${[c.city, c.state].filter(Boolean).join(', ') || '—'}</td>
-      <td>${c.customer_type ? `<span class="badge badge-navy">${c.customer_type}</span>` : '—'}</td>
-      <td style="color:var(--gray-400);font-size:12px">${contactCount} contact${contactCount !== 1 ? 's' : ''}</td>
-      <td><span class="badge ${c.is_stub ? 'badge-amber' : 'badge-green'}">${c.is_stub ? 'Stub' : 'Active'}</span></td>
+      <td><span class="company-name">${c.name}</span>${c.is_stub?' <span class="stub-badge">Stub</span>':''}</td>
+      <td>${c.phone||'—'}</td>
+      <td>${[c.city,c.state].filter(Boolean).join(', ')||'—'}</td>
+      <td>${c.customer_type?`<span class="badge badge-navy">${c.customer_type}</span>`:'—'}</td>
+      <td style="color:var(--gray-400);font-size:12px">${cc} contact${cc!==1?'s':''}</td>
+      <td><span class="badge ${c.is_stub?'badge-amber':'badge-green'}">${c.is_stub?'Stub':'Active'}</span></td>
     </tr>`;
   }).join('');
 }
 
 function filterCompanies() { renderCompanies(); }
 
-// ── CONTACTS PAGE ──
+// ── CONTACTS ──
 function renderContacts() {
   const tbody = document.getElementById('contacts-tbody');
-  const q = (document.getElementById('contact-search')?.value || '').toLowerCase();
-  const filtered = allContacts.filter(c => {
-    const full = `${c.first_name||''} ${c.last_name||''} ${c.email||''}`.toLowerCase();
-    return !q || full.includes(q);
-  });
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--gray-400)">No contacts found</td></tr>`;
-    return;
-  }
+  const q = (document.getElementById('contact-search')?.value||'').toLowerCase();
+  const filtered = allContacts.filter(c => !q || `${c.first_name||''} ${c.last_name||''} ${c.email||''}`.toLowerCase().includes(q));
+  if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--gray-400)">No contacts found</td></tr>`; return; }
   const today = new Date().toISOString().split('T')[0];
   tbody.innerHTML = filtered.map(c => {
     const company = allCompanies.find(co => co.id === c.company_id);
-    let followupBadge = '';
-    if (c.follow_up_date) {
-      const overdue = c.follow_up_date < today;
-      const dueToday = c.follow_up_date === today;
-      followupBadge = `<span class="badge ${overdue ? 'badge-red' : dueToday ? 'badge-amber' : 'badge-green'}">${overdue ? 'Overdue' : dueToday ? 'Today' : c.follow_up_date}</span>`;
-    }
+    let fb = '';
+    if (c.follow_up_date) { const ov = c.follow_up_date < today, dt = c.follow_up_date === today; fb = `<span class="badge ${ov?'badge-red':dt?'badge-amber':'badge-green'}">${ov?'Overdue':dt?'Today':c.follow_up_date}</span>`; }
     return `<tr onclick="openContact('${c.id}')">
-      <td><span class="contact-name">${c.first_name||''} ${c.last_name||''}</span>${c.is_stub ? ' <span class="stub-badge">Stub</span>' : ''}</td>
-      <td style="color:var(--gray-600)">${company ? company.name : '—'}</td>
-      <td style="color:var(--gray-600)">${c.email || '—'}</td>
-      <td style="color:var(--gray-600)">${c.phone || '—'}</td>
-      <td>${followupBadge || '—'}</td>
-      <td style="color:var(--gray-600)">${c.owner || '—'}</td>
+      <td><span class="contact-name">${c.first_name||''} ${c.last_name||''}</span>${c.is_stub?' <span class="stub-badge">Stub</span>':''}</td>
+      <td style="color:var(--gray-600)">${company?company.name:'—'}</td>
+      <td style="color:var(--gray-600)">${c.email||'—'}</td>
+      <td style="color:var(--gray-600)">${c.phone||'—'}</td>
+      <td>${fb||'—'}</td>
+      <td style="color:var(--gray-600)">${c.owner||'—'}</td>
     </tr>`;
   }).join('');
 }
@@ -1557,68 +905,37 @@ async function openCompany(id) {
   currentCompanyId = id;
   const c = allCompanies.find(co => co.id === id);
   if (!c) return;
-
   document.getElementById('cp-name').textContent = c.name;
-  document.getElementById('cp-sub').textContent = [c.city, c.state].filter(Boolean).join(', ') || 'No location set';
-  document.getElementById('cp-field-name').value = c.name || '';
-  document.getElementById('cp-field-phone').value = c.phone || '';
-  document.getElementById('cp-field-type').value = c.customer_type || '';
-  document.getElementById('cp-field-city').value = c.city || '';
-  document.getElementById('cp-field-state').value = c.state || '';
-  document.getElementById('cp-field-notes').value = c.notes || '';
-
-  // Load contacts for this company
+  document.getElementById('cp-sub').textContent = [c.city,c.state].filter(Boolean).join(', ')||'No location set';
+  document.getElementById('cp-field-name').value = c.name||'';
+  document.getElementById('cp-field-phone').value = c.phone||'';
+  document.getElementById('cp-field-type').value = c.customer_type||'';
+  document.getElementById('cp-field-city').value = c.city||'';
+  document.getElementById('cp-field-state').value = c.state||'';
+  document.getElementById('cp-field-notes').value = c.notes||'';
   const contacts = allContacts.filter(ct => ct.company_id === id);
-  const cpContacts = document.getElementById('cp-contacts-list');
-  if (contacts.length) {
-    cpContacts.innerHTML = contacts.map(ct => `
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100)">
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:13px">${ct.first_name||''} ${ct.last_name||''} ${ct.is_stub ? '<span class="stub-badge">Stub</span>' : ''}</div>
-          <div style="font-size:12px;color:var(--gray-600)">${ct.email || ct.phone || '—'}</div>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="openContact('${ct.id}')">View</button>
-      </div>`).join('');
-  } else {
-    cpContacts.innerHTML = '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No contacts yet</div>';
-  }
-
-  // Load timeline
+  const cpC = document.getElementById('cp-contacts-list');
+  cpC.innerHTML = contacts.length ? contacts.map(ct => `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100)"><div style="flex:1"><div style="font-weight:600;font-size:13px">${ct.first_name||''} ${ct.last_name||''} ${ct.is_stub?'<span class="stub-badge">Stub</span>':''}</div><div style="font-size:12px;color:var(--gray-600)">${ct.email||ct.phone||'—'}</div></div><button class="btn btn-ghost btn-sm" onclick="openContact('${ct.id}')">View</button></div>`).join('') : '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No contacts yet</div>';
   loadCompanyTimeline(id);
-
-  // Load orders
   loadCompanyOrders(id);
-
   document.getElementById('company-overlay').classList.add('open');
   document.getElementById('company-panel').classList.add('open');
 }
 
-async function loadCompanyTimeline(companyId) {
+async function loadCompanyTimeline(id) {
   const el = document.getElementById('cp-timeline');
   try {
-    const activities = await apiGet(`/activities?company_id=eq.${companyId}&order=occurred_at.desc&limit=20`) || [];
-    el.innerHTML = activities.length
-      ? `<div class="timeline">${activities.map(a => renderTimelineItem(a)).join('')}</div>`
-      : '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No activity logged yet</div>';
+    const a = await apiGet(`/activities?company_id=eq.${id}&order=occurred_at.desc&limit=20`) || [];
+    el.innerHTML = a.length ? `<div class="timeline">${a.map(renderTimelineItem).join('')}</div>` : '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No activity logged yet</div>';
   } catch(e) { el.innerHTML = '<div style="color:var(--gray-400);font-size:13px">Could not load timeline</div>'; }
 }
 
-async function loadCompanyOrders(companyId) {
+async function loadCompanyOrders(id) {
   const el = document.getElementById('cp-orders');
   try {
-    const orders = await apiGet(`/orders?company_id=eq.${companyId}&order=invoice_date.desc&limit=10`) || [];
-    if (!orders.length) {
-      el.innerHTML = '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No orders on record</div>';
-      return;
-    }
-    el.innerHTML = `<table style="width:100%">
-      <thead><tr><th style="padding:6px 0;font-size:11px;color:var(--gray-600)">Date</th><th style="padding:6px 0;font-size:11px;color:var(--gray-600)">Invoice #</th><th style="padding:6px 0;font-size:11px;color:var(--gray-600);text-align:right">Amount</th></tr></thead>
-      <tbody>${orders.map(o => `<tr>
-        <td style="padding:6px 0;font-size:13px">${o.invoice_date || '—'}</td>
-        <td style="padding:6px 0;font-size:13px;color:var(--gray-600)">${o.invoice_number || '—'}</td>
-        <td style="padding:6px 0;font-size:13px;text-align:right;font-weight:600">${o.total_amount ? '$'+Number(o.total_amount).toLocaleString('en-US',{minimumFractionDigits:2}) : '—'}</td>
-      </tr>`).join('')}</tbody>
-    </table>`;
+    const orders = await apiGet(`/orders?company_id=eq.${id}&order=invoice_date.desc&limit=10`) || [];
+    el.innerHTML = !orders.length ? '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No orders on record</div>' :
+      `<table style="width:100%"><thead><tr><th style="padding:6px 0;font-size:11px;color:var(--gray-600)">Date</th><th style="padding:6px 0;font-size:11px;color:var(--gray-600)">Invoice #</th><th style="padding:6px 0;font-size:11px;color:var(--gray-600);text-align:right">Amount</th></tr></thead><tbody>${orders.map(o=>`<tr><td style="padding:6px 0;font-size:13px">${o.invoice_date||'—'}</td><td style="padding:6px 0;font-size:13px;color:var(--gray-600)">${o.invoice_number||'—'}</td><td style="padding:6px 0;font-size:13px;text-align:right;font-weight:600">${o.total_amount?'$'+Number(o.total_amount).toLocaleString('en-US',{minimumFractionDigits:2}):'—'}</td></tr>`).join('')}</tbody></table>`;
   } catch(e) { el.innerHTML = '<div style="color:var(--gray-400);font-size:13px">Could not load orders</div>'; }
 }
 
@@ -1630,15 +947,7 @@ function closeCompanyPanel() {
 
 async function saveCompany() {
   if (!currentCompanyId) return;
-  const body = {
-    name: document.getElementById('cp-field-name').value.trim(),
-    phone: document.getElementById('cp-field-phone').value.trim(),
-    customer_type: document.getElementById('cp-field-type').value,
-    city: document.getElementById('cp-field-city').value.trim(),
-    state: document.getElementById('cp-field-state').value.trim(),
-    notes: document.getElementById('cp-field-notes').value.trim(),
-    is_stub: false
-  };
+  const body = { name: document.getElementById('cp-field-name').value.trim(), phone: document.getElementById('cp-field-phone').value.trim(), customer_type: document.getElementById('cp-field-type').value, city: document.getElementById('cp-field-city').value.trim(), state: document.getElementById('cp-field-state').value.trim(), notes: document.getElementById('cp-field-notes').value.trim(), is_stub: false };
   try {
     await apiPatch(`/companies?id=eq.${currentCompanyId}`, body);
     const idx = allCompanies.findIndex(c => c.id === currentCompanyId);
@@ -1646,7 +955,7 @@ async function saveCompany() {
     showToast('Company saved', 'success');
     closeCompanyPanel();
     renderCompanies();
-  } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
+  } catch(e) { showToast('Save failed: '+e.message, 'error'); }
 }
 
 // ── CONTACT PANEL ──
@@ -1654,35 +963,29 @@ async function openContact(id) {
   currentContactId = id;
   const c = allContacts.find(ct => ct.id === id);
   if (!c) return;
-
   const company = allCompanies.find(co => co.id === c.company_id);
-  document.getElementById('ct-name').textContent = `${c.first_name||''} ${c.last_name||''}`.trim() || 'Contact';
+  document.getElementById('ct-name').textContent = `${c.first_name||''} ${c.last_name||''}`.trim()||'Contact';
   document.getElementById('ct-sub').textContent = company ? company.name : 'No company';
-
-  document.getElementById('ct-field-first').value = c.first_name || '';
-  document.getElementById('ct-field-last').value = c.last_name || '';
-  document.getElementById('ct-field-title').value = c.title || '';
-  document.getElementById('ct-field-email').value = c.email || '';
-  document.getElementById('ct-field-phone').value = c.phone || '';
-  document.getElementById('ct-field-phone2').value = c.phone_secondary || '';
-  document.getElementById('ct-field-followup').value = c.follow_up_date || '';
-  document.getElementById('ct-field-followup-note').value = c.follow_up_note || '';
-  document.getElementById('ct-field-owner').value = c.owner || 'Jeff';
-
+  document.getElementById('ct-field-first').value = c.first_name||'';
+  document.getElementById('ct-field-last').value = c.last_name||'';
+  document.getElementById('ct-field-title').value = c.title||'';
+  document.getElementById('ct-field-email').value = c.email||'';
+  document.getElementById('ct-field-phone').value = c.phone||'';
+  document.getElementById('ct-field-phone2').value = c.phone_secondary||'';
+  document.getElementById('ct-field-followup').value = c.follow_up_date||'';
+  document.getElementById('ct-field-followup-note').value = c.follow_up_note||'';
+  document.getElementById('ct-field-owner').value = c.owner||'Jeff';
   populateCompanyDropdown('ct-field-company', c.company_id);
   loadContactTimeline(id);
-
   document.getElementById('contact-overlay').classList.add('open');
   document.getElementById('contact-panel').classList.add('open');
 }
 
-async function loadContactTimeline(contactId) {
+async function loadContactTimeline(id) {
   const el = document.getElementById('ct-timeline');
   try {
-    const activities = await apiGet(`/activities?contact_id=eq.${contactId}&order=occurred_at.desc&limit=20`) || [];
-    el.innerHTML = activities.length
-      ? `<div class="timeline">${activities.map(a => renderTimelineItem(a)).join('')}</div>`
-      : '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No activity logged yet</div>';
+    const a = await apiGet(`/activities?contact_id=eq.${id}&order=occurred_at.desc&limit=20`) || [];
+    el.innerHTML = a.length ? `<div class="timeline">${a.map(renderTimelineItem).join('')}</div>` : '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No activity logged yet</div>';
   } catch(e) { el.innerHTML = '<div style="color:var(--gray-400);font-size:13px">Could not load timeline</div>'; }
 }
 
@@ -1694,19 +997,7 @@ function closeContactPanel() {
 
 async function saveContact() {
   if (!currentContactId) return;
-  const body = {
-    first_name: document.getElementById('ct-field-first').value.trim(),
-    last_name: document.getElementById('ct-field-last').value.trim(),
-    title: document.getElementById('ct-field-title').value.trim(),
-    email: document.getElementById('ct-field-email').value.trim(),
-    phone: document.getElementById('ct-field-phone').value.trim(),
-    phone_secondary: document.getElementById('ct-field-phone2').value.trim(),
-    follow_up_date: document.getElementById('ct-field-followup').value || null,
-    follow_up_note: document.getElementById('ct-field-followup-note').value.trim(),
-    owner: document.getElementById('ct-field-owner').value,
-    company_id: document.getElementById('ct-field-company').value || null,
-    is_stub: false
-  };
+  const body = { first_name: document.getElementById('ct-field-first').value.trim(), last_name: document.getElementById('ct-field-last').value.trim(), title: document.getElementById('ct-field-title').value.trim(), email: document.getElementById('ct-field-email').value.trim(), phone: document.getElementById('ct-field-phone').value.trim(), phone_secondary: document.getElementById('ct-field-phone2').value.trim(), follow_up_date: document.getElementById('ct-field-followup').value||null, follow_up_note: document.getElementById('ct-field-followup-note').value.trim(), owner: document.getElementById('ct-field-owner').value, company_id: document.getElementById('ct-field-company').value||null, is_stub: false };
   try {
     await apiPatch(`/contacts?id=eq.${currentContactId}`, body);
     const idx = allContacts.findIndex(c => c.id === currentContactId);
@@ -1714,13 +1005,13 @@ async function saveContact() {
     showToast('Contact saved', 'success');
     closeContactPanel();
     renderContacts();
-  } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
+  } catch(e) { showToast('Save failed: '+e.message, 'error'); }
 }
 
 // ── ADD MODALS ──
 function openAddCompanyModal() {
-  ['name','phone','city','state'].forEach(f => document.getElementById(`new-company-${f}`).value = '');
-  document.getElementById('new-company-type').value = '';
+  ['name','phone','city','state'].forEach(f => document.getElementById(`new-company-${f}`).value='');
+  document.getElementById('new-company-type').value='';
   document.getElementById('add-company-modal').classList.add('open');
 }
 
@@ -1728,179 +1019,85 @@ async function saveNewCompany() {
   const name = document.getElementById('new-company-name').value.trim();
   if (!name) { showToast('Company name is required', 'error'); return; }
   try {
-    const result = await apiPost('/companies', {
-      name,
-      phone: document.getElementById('new-company-phone').value.trim(),
-      customer_type: document.getElementById('new-company-type').value,
-      city: document.getElementById('new-company-city').value.trim(),
-      state: document.getElementById('new-company-state').value.trim(),
-      is_stub: false
-    });
-    if (result && result[0]) allCompanies.push(result[0]);
-    allCompanies.sort((a,b) => a.name.localeCompare(b.name));
+    const result = await apiPost('/companies', { name, phone: document.getElementById('new-company-phone').value.trim(), customer_type: document.getElementById('new-company-type').value, city: document.getElementById('new-company-city').value.trim(), state: document.getElementById('new-company-state').value.trim(), is_stub: false });
+    if (result?.[0]) { allCompanies.push(result[0]); allCompanies.sort((a,b)=>a.name.localeCompare(b.name)); }
     showToast('Company added', 'success');
     closeModal('add-company-modal');
     renderCompanies();
     document.getElementById('stat-companies').textContent = allCompanies.length;
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
 }
 
-function openAddContactModal(presetCompanyId = null) {
-  ['first','last','email','phone','title'].forEach(f => document.getElementById(`new-contact-${f}`).value = '');
-  document.getElementById('new-contact-owner').value = 'Jeff';
+function openAddContactModal(presetCompanyId=null) {
+  ['first','last','email','phone','title'].forEach(f => document.getElementById(`new-contact-${f}`).value='');
+  document.getElementById('new-contact-owner').value='Jeff';
   populateCompanyDropdown('new-contact-company', presetCompanyId);
   document.getElementById('add-contact-modal').classList.add('open');
 }
 
-function addContactForCompany() {
-  closeCompanyPanel();
-  openAddContactModal(currentCompanyId);
-}
+function addContactForCompany() { const id = currentCompanyId; closeCompanyPanel(); openAddContactModal(id); }
 
 async function saveNewContact() {
   const first = document.getElementById('new-contact-first').value.trim();
   const last = document.getElementById('new-contact-last').value.trim();
   if (!first && !last) { showToast('Name is required', 'error'); return; }
   try {
-    const result = await apiPost('/contacts', {
-      first_name: first,
-      last_name: last,
-      email: document.getElementById('new-contact-email').value.trim(),
-      phone: document.getElementById('new-contact-phone').value.trim(),
-      title: document.getElementById('new-contact-title').value.trim(),
-      owner: document.getElementById('new-contact-owner').value,
-      company_id: document.getElementById('new-contact-company').value || null,
-      is_stub: false
-    });
-    if (result && result[0]) allContacts.push(result[0]);
-    allContacts.sort((a,b) => (a.last_name||'').localeCompare(b.last_name||''));
+    const result = await apiPost('/contacts', { first_name: first, last_name: last, email: document.getElementById('new-contact-email').value.trim(), phone: document.getElementById('new-contact-phone').value.trim(), title: document.getElementById('new-contact-title').value.trim(), owner: document.getElementById('new-contact-owner').value, company_id: document.getElementById('new-contact-company').value||null, is_stub: false });
+    if (result?.[0]) { allContacts.push(result[0]); allContacts.sort((a,b)=>(a.last_name||'').localeCompare(b.last_name||'')); }
     showToast('Contact added', 'success');
     closeModal('add-contact-modal');
     renderContacts();
     document.getElementById('stat-contacts').textContent = allContacts.length;
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
 }
 
 // ── NOTES ──
-function openAddNoteModal(target) {
-  noteTargetType = target;
-  document.getElementById('note-text').value = '';
-  document.getElementById('note-modal').classList.add('open');
-}
+function openAddNoteModal(target) { noteTargetType=target; document.getElementById('note-text').value=''; document.getElementById('note-modal').classList.add('open'); }
 
 async function saveNote() {
   const text = document.getElementById('note-text').value.trim();
   if (!text) { showToast('Note cannot be empty', 'error'); return; }
-  const body = {
-    type: 'note',
-    summary: text,
-    source: 'manual',
-    logged_by: currentUser?.name || 'Unknown',
-    occurred_at: new Date().toISOString()
-  };
-  if (noteTargetType === 'company' && currentCompanyId) body.company_id = currentCompanyId;
-  if (noteTargetType === 'contact' && currentContactId) {
-    body.contact_id = currentContactId;
-    const ct = allContacts.find(c => c.id === currentContactId);
-    if (ct) body.company_id = ct.company_id;
-  }
-  try {
-    await apiPost('/activities', body);
-    showToast('Note saved', 'success');
-    closeModal('note-modal');
-    if (noteTargetType === 'company' && currentCompanyId) loadCompanyTimeline(currentCompanyId);
-    if (noteTargetType === 'contact' && currentContactId) loadContactTimeline(currentContactId);
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  const body = { type:'note', summary:text, source:'manual', logged_by:currentUser?.name||'Unknown', occurred_at:new Date().toISOString() };
+  if (noteTargetType==='company'&&currentCompanyId) body.company_id=currentCompanyId;
+  if (noteTargetType==='contact'&&currentContactId) { body.contact_id=currentContactId; const ct=allContacts.find(c=>c.id===currentContactId); if(ct) body.company_id=ct.company_id; }
+  try { await apiPost('/activities', body); showToast('Note saved','success'); closeModal('note-modal'); if(noteTargetType==='company'&&currentCompanyId) loadCompanyTimeline(currentCompanyId); if(noteTargetType==='contact'&&currentContactId) loadContactTimeline(currentContactId); } catch(e) { showToast('Error: '+e.message,'error'); }
 }
 
 // ── SUPPLIERS ──
 async function loadSuppliers() {
   const tbody = document.getElementById('suppliers-tbody');
   try {
-    const suppliers = await apiGet('/suppliers?order=name.asc') || [];
-    if (!suppliers.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--gray-400)">No suppliers added yet</td></tr>';
-      return;
-    }
-    tbody.innerHTML = suppliers.map(s => `<tr>
-      <td><span class="company-name">${s.name}</span></td>
-      <td>${s.phone || '—'}</td>
-      <td>${s.email || '—'}</td>
-      <td>${s.website ? `<a href="${s.website}" target="_blank" style="color:var(--copper)">${s.website}</a>` : '—'}</td>
-      <td><span class="badge ${s.is_active ? 'badge-green' : 'badge-gray'}">${s.is_active ? 'Active' : 'Inactive'}</span></td>
-    </tr>`).join('');
+    const s = await apiGet('/suppliers?order=name.asc') || [];
+    tbody.innerHTML = !s.length ? '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--gray-400)">No suppliers added yet</td></tr>' :
+      s.map(s=>`<tr><td><span class="company-name">${s.name}</span></td><td>${s.phone||'—'}</td><td>${s.email||'—'}</td><td>${s.website?`<a href="${s.website}" target="_blank" style="color:var(--copper)">${s.website}</a>`:'—'}</td><td><span class="badge ${s.is_active?'badge-green':'badge-gray'}">${s.is_active?'Active':'Inactive'}</span></td></tr>`).join('');
   } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--gray-400)">Could not load suppliers</td></tr>'; }
 }
 
-function openAddSupplierModal() {
-  ['name','phone','email','website','notes'].forEach(f => document.getElementById(`new-supplier-${f}`).value = '');
-  document.getElementById('add-supplier-modal').classList.add('open');
-}
+function openAddSupplierModal() { ['name','phone','email','website','notes'].forEach(f=>document.getElementById(`new-supplier-${f}`).value=''); document.getElementById('add-supplier-modal').classList.add('open'); }
 
 async function saveNewSupplier() {
   const name = document.getElementById('new-supplier-name').value.trim();
-  if (!name) { showToast('Supplier name is required', 'error'); return; }
-  try {
-    await apiPost('/suppliers', {
-      name,
-      phone: document.getElementById('new-supplier-phone').value.trim(),
-      email: document.getElementById('new-supplier-email').value.trim(),
-      website: document.getElementById('new-supplier-website').value.trim(),
-      notes: document.getElementById('new-supplier-notes').value.trim(),
-      is_active: true
-    });
-    showToast('Supplier added', 'success');
-    closeModal('add-supplier-modal');
-    loadSuppliers();
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  if (!name) { showToast('Supplier name is required','error'); return; }
+  try { await apiPost('/suppliers', { name, phone: document.getElementById('new-supplier-phone').value.trim(), email: document.getElementById('new-supplier-email').value.trim(), website: document.getElementById('new-supplier-website').value.trim(), notes: document.getElementById('new-supplier-notes').value.trim(), is_active:true }); showToast('Supplier added','success'); closeModal('add-supplier-modal'); loadSuppliers(); } catch(e) { showToast('Error: '+e.message,'error'); }
 }
 
-// ── NEEDS REVIEW ──
+// ── REVIEW ──
 async function loadReview() {
   const el = document.getElementById('review-list');
   try {
     const items = await apiGet('/needs_review?is_resolved=eq.false&order=created_at.desc') || [];
     document.getElementById('review-count').textContent = `${items.length} items`;
-    if (!items.length) {
-      el.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><p>Nothing needs review right now.</p></div>';
-      return;
-    }
-    el.innerHTML = items.map(item => {
-      const iconClass = item.type.startsWith('stub') ? 'stub' : item.type.startsWith('aged') ? 'aged' : 'unmatched';
-      return `<div class="review-item">
-        <div class="review-icon ${iconClass}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div class="review-content">
-          <div class="review-title">${formatReviewType(item.type)}</div>
-          <div class="review-desc">${item.description || '—'}</div>
-          <div class="review-date">${formatDate(item.created_at)}</div>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="resolveReviewItem('${item.id}')">Resolve</button>
-      </div>`;
-    }).join('');
+    el.innerHTML = !items.length ? '<div class="empty-state"><p>Nothing needs review right now.</p></div>' :
+      items.map(item => { const ic = item.type.startsWith('stub')?'stub':item.type.startsWith('aged')?'aged':'unmatched'; return `<div class="review-item"><div class="review-icon ${ic}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="review-content"><div class="review-title">${formatReviewType(item.type)}</div><div class="review-desc">${item.description||'—'}</div><div class="review-date">${formatDate(item.created_at)}</div></div><button class="btn btn-secondary btn-sm" onclick="resolveReviewItem('${item.id}')">Resolve</button></div>`; }).join('');
   } catch(e) { el.innerHTML = '<div class="empty-state"><p>Could not load review queue</p></div>'; }
 }
 
 async function loadReviewBadge() {
-  try {
-    const items = await apiGet('/needs_review?is_resolved=eq.false&select=id') || [];
-    const badge = document.getElementById('review-badge');
-    document.getElementById('stat-review').textContent = items.length;
-    if (items.length > 0) {
-      badge.textContent = items.length;
-      badge.style.display = 'inline-block';
-    }
-  } catch(e) {}
+  try { const items = await apiGet('/needs_review?is_resolved=eq.false&select=id') || []; document.getElementById('stat-review').textContent=items.length; if(items.length>0){const b=document.getElementById('review-badge');b.textContent=items.length;b.style.display='inline-block';} } catch(e){}
 }
 
 async function resolveReviewItem(id) {
-  try {
-    await apiPatch(`/needs_review?id=eq.${id}`, { is_resolved: true, resolved_at: new Date().toISOString() });
-    showToast('Marked as resolved', 'success');
-    loadReview();
-    loadReviewBadge();
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  try { await apiPatch(`/needs_review?id=eq.${id}`,{is_resolved:true,resolved_at:new Date().toISOString()}); showToast('Marked as resolved','success'); loadReview(); loadReviewBadge(); } catch(e){showToast('Error: '+e.message,'error');}
 }
 
 // ── QUOTES ──
@@ -1908,136 +1105,60 @@ async function loadQuotes() {
   const tbody = document.getElementById('quotes-tbody');
   try {
     const quotes = await apiGet('/quotes?order=created_at.desc&limit=100') || [];
-    if (!quotes.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400)">No quotes yet</td></tr>';
-      return;
-    }
-    tbody.innerHTML = quotes.map(q => {
-      const company = allCompanies.find(c => c.id === q.company_id);
-      const contact = allContacts.find(c => c.id === q.contact_id);
-      const statusColors = { open: 'badge-amber', ordered: 'badge-green', lost: 'badge-red', expired: 'badge-gray' };
-      return `<tr>
-        <td style="font-family:var(--font-mono);font-size:12px">${q.quote_number || '—'}</td>
-        <td>${company ? company.name : '—'}</td>
-        <td>${contact ? `${contact.first_name||''} ${contact.last_name||''}` : '—'}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.spec_description || '—'}</td>
-        <td style="color:var(--gray-600)">${q.date_quoted || '—'}</td>
-        <td style="font-weight:600">${q.customer_price ? '$'+Number(q.customer_price).toLocaleString('en-US',{minimumFractionDigits:2}) : '—'}</td>
-        <td><span class="badge ${statusColors[q.status] || 'badge-gray'}">${q.status}</span></td>
-      </tr>`;
-    }).join('');
-  } catch(e) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400)">Could not load quotes</td></tr>'; }
+    if (!quotes.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400)">No quotes yet</td></tr>'; return; }
+    const sc={open:'badge-amber',ordered:'badge-green',lost:'badge-red',expired:'badge-gray'};
+    tbody.innerHTML = quotes.map(q=>{const co=allCompanies.find(c=>c.id===q.company_id),ct=allContacts.find(c=>c.id===q.contact_id);return`<tr><td style="font-family:var(--font-mono);font-size:12px">${q.quote_number||'—'}</td><td>${co?co.name:'—'}</td><td>${ct?`${ct.first_name||''} ${ct.last_name||''}`:'—'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.spec_description||'—'}</td><td style="color:var(--gray-600)">${q.date_quoted||'—'}</td><td style="font-weight:600">${q.customer_price?'$'+Number(q.customer_price).toLocaleString('en-US',{minimumFractionDigits:2}):'—'}</td><td><span class="badge ${sc[q.status]||'badge-gray'}">${q.status}</span></td></tr>`;}).join('');
+  } catch(e) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400)">Could not load quotes</td></tr>'; }
 }
 
 // ── HELPERS ──
-function populateCompanyDropdown(selectId, selectedId = null) {
-  const sel = document.getElementById(selectId);
-  sel.innerHTML = '<option value="">— No Company —</option>' +
-    allCompanies.map(c => `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.name}</option>`).join('');
+function populateCompanyDropdown(selectId, selectedId=null) {
+  document.getElementById(selectId).innerHTML = '<option value="">— No Company —</option>' + allCompanies.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.name}</option>`).join('');
 }
 
 function renderTimelineItem(a) {
-  const icons = {
-    call: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.08 2 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>`,
-    email: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
-    order: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,
-    note: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-    quote: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
-  };
-  return `<div class="timeline-item">
-    <div class="timeline-icon ${a.type}">${icons[a.type] || icons.note}</div>
-    <div class="timeline-content">
-      <div class="timeline-top">
-        <div class="timeline-summary">${a.summary || a.type}</div>
-        <div class="timeline-date">${formatDate(a.occurred_at)}</div>
-      </div>
-      ${a.logged_by ? `<div class="timeline-detail">${a.logged_by}</div>` : ''}
-    </div>
-  </div>`;
+  const icons={call:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.08 2 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>`,email:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,order:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,note:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,quote:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`};
+  return `<div class="timeline-item"><div class="timeline-icon ${a.type}">${icons[a.type]||icons.note}</div><div class="timeline-content"><div class="timeline-top"><div class="timeline-summary">${a.summary||a.type}</div><div class="timeline-date">${formatDate(a.occurred_at)}</div></div>${a.logged_by?`<div class="timeline-detail">${a.logged_by}</div>`:''}</div></div>`;
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diff = now - d;
-  if (diff < 60000) return 'Just now';
-  if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`;
-  if (diff < 86400000) return `${Math.floor(diff/3600000)}h ago`;
-  if (diff < 604800000) return `${Math.floor(diff/86400000)}d ago`;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+function formatDate(d) {
+  if(!d) return '—';
+  const dt=new Date(d), now=new Date(), diff=now-dt;
+  if(diff<60000) return 'Just now';
+  if(diff<3600000) return `${Math.floor(diff/60000)}m ago`;
+  if(diff<86400000) return `${Math.floor(diff/3600000)}h ago`;
+  if(diff<604800000) return `${Math.floor(diff/86400000)}d ago`;
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:dt.getFullYear()!==now.getFullYear()?'numeric':undefined});
 }
 
-function formatReviewType(type) {
-  const labels = {
-    stub_company: 'Stub Company — needs details',
-    stub_contact: 'Stub Contact — needs details',
-    aged_quote: 'Aged Quote — no response',
-    unmatched_call: 'Unmatched Call — unknown number',
-    unmatched_email: 'Unmatched Email — unknown sender'
-  };
-  return labels[type] || type;
+function formatReviewType(t) { return {stub_company:'Stub Company — needs details',stub_contact:'Stub Contact — needs details',aged_quote:'Aged Quote — no response',unmatched_call:'Unmatched Call — unknown number',unmatched_email:'Unmatched Email — unknown sender'}[t]||t; }
+
+function showToast(msg, type='') {
+  const icons={success:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,error:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`};
+  const t=document.createElement('div'); t.className=`toast ${type}`; t.innerHTML=(icons[type]||'')+msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
 }
 
-function showToast(msg, type = '') {
-  const icons = {
-    success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
-    error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
-  };
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = (icons[type] || '') + msg;
-  document.getElementById('toast-container').appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 // ── NAVIGATION ──
 function showPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(`page-${page}`).classList.add('active');
   document.querySelector(`.nav-item[onclick="showPage('${page}')"]`)?.classList.add('active');
-
-  const titles = { dashboard: 'Dashboard', companies: 'Companies', contacts: 'Contacts', review: 'Needs Review', quotes: 'Quotes', suppliers: 'Suppliers' };
-  document.getElementById('page-title').textContent = titles[page] || page;
-
-  const actions = document.getElementById('topbar-actions');
-  actions.innerHTML = '';
-
-  if (page === 'companies') {
-    renderCompanies();
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-primary';
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Company`;
-    btn.onclick = openAddCompanyModal;
-    actions.appendChild(btn);
-  }
-  if (page === 'contacts') {
-    renderContacts();
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-primary';
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Contact`;
-    btn.onclick = () => openAddContactModal();
-    actions.appendChild(btn);
-  }
-  if (page === 'suppliers') {
-    loadSuppliers();
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-primary';
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Supplier`;
-    btn.onclick = openAddSupplierModal;
-    actions.appendChild(btn);
-  }
-  if (page === 'review') loadReview();
-  if (page === 'quotes') loadQuotes();
+  const titles={dashboard:'Dashboard',companies:'Companies',contacts:'Contacts',review:'Needs Review',quotes:'Quotes',suppliers:'Suppliers'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+  const actions=document.getElementById('topbar-actions');
+  actions.innerHTML='';
+  if(page==='companies'){renderCompanies();const b=document.createElement('button');b.className='btn btn-primary';b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Company`;b.onclick=openAddCompanyModal;actions.appendChild(b);}
+  if(page==='contacts'){renderContacts();const b=document.createElement('button');b.className='btn btn-primary';b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Contact`;b.onclick=()=>openAddContactModal();actions.appendChild(b);}
+  if(page==='suppliers'){loadSuppliers();const b=document.createElement('button');b.className='btn btn-primary';b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Supplier`;b.onclick=openAddSupplierModal;actions.appendChild(b);}
+  if(page==='review') loadReview();
+  if(page==='quotes') loadQuotes();
 }
 
-// ── BOOT ──
 window.addEventListener('DOMContentLoaded', checkAuth);
 </script>
 </body>
