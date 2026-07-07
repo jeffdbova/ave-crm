@@ -817,17 +817,27 @@ async function initApp() {
 }
 
 async function loadCompanies() {
-  try { allCompanies = await apiGet('/companies?order=name.asc&limit=500') || []; } catch(e) { allCompanies = []; }
+  try { allCompanies = await apiGet('/companies?order=name.asc'/companies?order=name.asc&limit=500'limit=2000') || []; } catch(e) { allCompanies = []; }
 }
 
 async function loadContacts() {
-  try { allContacts = await apiGet('/contacts?order=last_name.asc&limit=1000') || []; } catch(e) { allContacts = []; }
+  try { allContacts = await apiGet('/contacts?order=last_name.asc'/contacts?order=last_name.asc&limit=1000'limit=2000') || []; } catch(e) { allContacts = []; }
 }
 
 // ── DASHBOARD ──
 async function loadDashboard() {
+  // Show loaded counts immediately, then fetch real totals
   document.getElementById('stat-companies').textContent = allCompanies.length;
   document.getElementById('stat-contacts').textContent = allContacts.length;
+  // Get real counts from DB
+  try {
+    const cc = await apiGet('/companies?select=id&limit=5000');
+    document.getElementById('stat-companies').textContent = (cc||[]).length;
+  } catch(e) {}
+  try {
+    const ct = await apiGet('/contacts?select=id&limit=5000');
+    document.getElementById('stat-contacts').textContent = (ct||[]).length;
+  } catch(e) {}
   const today = new Date().toISOString().split('T')[0];
   const due = allContacts.filter(c => c.follow_up_date && c.follow_up_date <= today);
   document.getElementById('stat-followups').textContent = due.length;
