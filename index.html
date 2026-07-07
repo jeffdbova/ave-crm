@@ -817,11 +817,11 @@ async function initApp() {
 }
 
 async function loadCompanies() {
-  try { allCompanies = await apiGet('/companies?order=name.asc'/companies?order=name.asc&limit=500'limit=2000') || []; } catch(e) { allCompanies = []; }
+  try { allCompanies = await apiGet('/companies?order=name.asc&limit=2000') || []; } catch(e) { allCompanies = []; }
 }
 
 async function loadContacts() {
-  try { allContacts = await apiGet('/contacts?order=last_name.asc'/contacts?order=last_name.asc&limit=1000'limit=2000') || []; } catch(e) { allContacts = []; }
+  try { allContacts = await apiGet('/contacts?order=last_name.asc&limit=2000') || []; } catch(e) { allContacts = []; }
 }
 
 // ── DASHBOARD ──
