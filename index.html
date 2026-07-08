@@ -512,8 +512,8 @@
     <div class="panel-section">
       <div class="panel-section-title">Activity Timeline</div>
       <div id="cp-timeline"></div>
-      <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="openAddNoteModal('company')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Note
+      <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="openLogActivityModal('company')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Log Activity
       </button>
     </div>
     <div class="panel-section">
@@ -523,6 +523,7 @@
   </div>
   <div class="panel-footer">
     <button class="btn btn-ghost" onclick="closeCompanyPanel()">Cancel</button>
+    <button class="btn btn-secondary" id="cp-deactivate-btn" onclick="toggleCompanyActive()">Deactivate</button>
     <button class="btn btn-primary" onclick="saveCompany()">Save Changes</button>
   </div>
 </div>
@@ -553,8 +554,8 @@
     <div class="panel-section">
       <div class="panel-section-title">Activity Timeline</div>
       <div id="ct-timeline"></div>
-      <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="openAddNoteModal('contact')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Note
+      <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="openLogActivityModal('contact')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Log Activity
       </button>
     </div>
   </div>
@@ -564,12 +565,37 @@
   </div>
 </div>
 
-<!-- NOTE MODAL -->
-<div class="modal-overlay" id="note-modal">
+<!-- LOG ACTIVITY MODAL -->
+<div class="modal-overlay" id="log-activity-modal">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">Add Note</div><button class="btn-close" onclick="closeModal('note-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body"><div class="field"><label>Note</label><textarea id="note-text" rows="4" placeholder="Enter your note..."></textarea></div></div>
-    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('note-modal')">Cancel</button><button class="btn btn-primary" onclick="saveNote()">Save Note</button></div>
+    <div class="modal-header">
+      <div class="modal-title">Log Activity</div>
+      <button class="btn-close" onclick="closeModal('log-activity-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="field-grid">
+        <div class="field field-full">
+          <label>Activity Type</label>
+          <select id="activity-type">
+            <option value="note">Note</option>
+            <option value="call">Call</option>
+            <option value="email">Email</option>
+          </select>
+        </div>
+        <div class="field field-full">
+          <label>Date &amp; Time</label>
+          <input type="datetime-local" id="activity-date">
+        </div>
+        <div class="field field-full">
+          <label>Summary / Notes</label>
+          <textarea id="activity-text" rows="4" placeholder="What was discussed, next steps, etc..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('log-activity-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveActivity()">Save Activity</button>
+    </div>
   </div>
 </div>
 
@@ -642,7 +668,6 @@ let allCompanies = [];
 let allContacts = [];
 let currentCompanyId = null;
 let currentContactId = null;
-let noteTargetType = null;
 
 // ── PKCE HELPERS ──
 function generateCodeVerifier() {
@@ -877,13 +902,14 @@ function renderCompanies() {
   if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--gray-400)">No companies found</td></tr>`; return; }
   tbody.innerHTML = filtered.map(c => {
     const cc = allContacts.filter(ct => ct.company_id === c.id).length;
-    return `<tr onclick="openCompany('${c.id}')">
+    const isInactive = c.is_active === false;
+    return `<tr onclick="openCompany('${c.id}')" style="${isInactive?'opacity:0.5':''}">
       <td><span class="company-name">${c.name}</span>${c.is_stub?' <span class="stub-badge">Stub</span>':''}</td>
       <td>${c.phone||'—'}</td>
       <td>${[c.city,c.state].filter(Boolean).join(', ')||'—'}</td>
       <td>${c.customer_type?`<span class="badge badge-navy">${c.customer_type}</span>`:'—'}</td>
       <td style="color:var(--gray-400);font-size:12px">${cc} contact${cc!==1?'s':''}</td>
-      <td><span class="badge ${c.is_stub?'badge-amber':'badge-green'}">${c.is_stub?'Stub':'Active'}</span></td>
+      <td><span class="badge ${isInactive?'badge-gray':c.is_stub?'badge-amber':'badge-green'}">${isInactive?'Inactive':c.is_stub?'Stub':'Active'}</span></td>
     </tr>`;
   }).join('');
 }
@@ -932,6 +958,11 @@ async function openCompany(id) {
   cpC.innerHTML = contacts.length ? contacts.map(ct => `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100)"><div style="flex:1"><div style="font-weight:600;font-size:13px">${ct.first_name||''} ${ct.last_name||''} ${ct.is_stub?'<span class="stub-badge">Stub</span>':''}</div><div style="font-size:12px;color:var(--gray-600)">${ct.email||ct.phone||'—'}</div></div><button class="btn btn-ghost btn-sm" onclick="openContact('${ct.id}')">View</button></div>`).join('') : '<div style="color:var(--gray-400);font-size:13px;padding:8px 0">No contacts yet</div>';
   loadCompanyTimeline(id);
   loadCompanyOrders(id);
+  // Set deactivate button label
+  const isActive = c.is_active !== false;
+  const deactivateBtn = document.getElementById('cp-deactivate-btn');
+  deactivateBtn.textContent = isActive ? 'Deactivate' : 'Reactivate';
+  deactivateBtn.className = isActive ? 'btn btn-secondary' : 'btn btn-primary';
   document.getElementById('company-overlay').classList.add('open');
   document.getElementById('company-panel').classList.add('open');
 }
@@ -961,7 +992,8 @@ function closeCompanyPanel() {
 
 async function saveCompany() {
   if (!currentCompanyId) return;
-  const body = { name: document.getElementById('cp-field-name').value.trim(), phone: document.getElementById('cp-field-phone').value.trim(), customer_type: document.getElementById('cp-field-type').value, city: document.getElementById('cp-field-city').value.trim(), state: document.getElementById('cp-field-state').value.trim(), notes: document.getElementById('cp-field-notes').value.trim(), is_stub: false };
+  const currentCompany = allCompanies.find(c => c.id === currentCompanyId);
+  const body = { name: document.getElementById('cp-field-name').value.trim(), phone: document.getElementById('cp-field-phone').value.trim(), customer_type: document.getElementById('cp-field-type').value, city: document.getElementById('cp-field-city').value.trim(), state: document.getElementById('cp-field-state').value.trim(), notes: document.getElementById('cp-field-notes').value.trim(), is_stub: false, is_active: currentCompany ? currentCompany.is_active !== false : true };
   try {
     await apiPatch(`/companies?id=eq.${currentCompanyId}`, body);
     const idx = allCompanies.findIndex(c => c.id === currentCompanyId);
@@ -1065,16 +1097,61 @@ async function saveNewContact() {
   } catch(e) { showToast('Error: '+e.message, 'error'); }
 }
 
-// ── NOTES ──
-function openAddNoteModal(target) { noteTargetType=target; document.getElementById('note-text').value=''; document.getElementById('note-modal').classList.add('open'); }
+// ── ACTIVITY LOGGING ──
+let activityTargetType = null;
 
-async function saveNote() {
-  const text = document.getElementById('note-text').value.trim();
-  if (!text) { showToast('Note cannot be empty', 'error'); return; }
-  const body = { type:'note', summary:text, source:'manual', logged_by:currentUser?.name||'Unknown', occurred_at:new Date().toISOString() };
-  if (noteTargetType==='company'&&currentCompanyId) body.company_id=currentCompanyId;
-  if (noteTargetType==='contact'&&currentContactId) { body.contact_id=currentContactId; const ct=allContacts.find(c=>c.id===currentContactId); if(ct) body.company_id=ct.company_id; }
-  try { await apiPost('/activities', body); showToast('Note saved','success'); closeModal('note-modal'); if(noteTargetType==='company'&&currentCompanyId) loadCompanyTimeline(currentCompanyId); if(noteTargetType==='contact'&&currentContactId) loadContactTimeline(currentContactId); } catch(e) { showToast('Error: '+e.message,'error'); }
+function openLogActivityModal(target) {
+  activityTargetType = target;
+  document.getElementById('activity-text').value = '';
+  document.getElementById('activity-type').value = 'note';
+  // Default to now
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('activity-date').value = now.toISOString().slice(0,16);
+  document.getElementById('log-activity-modal').classList.add('open');
+}
+
+async function saveActivity() {
+  const text = document.getElementById('activity-text').value.trim();
+  const type = document.getElementById('activity-type').value;
+  const dateVal = document.getElementById('activity-date').value;
+  if (!text) { showToast('Please enter a summary', 'error'); return; }
+  const body = {
+    type,
+    summary: text,
+    source: 'manual',
+    logged_by: currentUser?.name || 'Unknown',
+    occurred_at: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString()
+  };
+  if (activityTargetType==='company' && currentCompanyId) body.company_id = currentCompanyId;
+  if (activityTargetType==='contact' && currentContactId) {
+    body.contact_id = currentContactId;
+    const ct = allContacts.find(c => c.id === currentContactId);
+    if (ct) body.company_id = ct.company_id;
+  }
+  try {
+    await apiPost('/activities', body);
+    const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+    showToast(`${typeLabel} logged`, 'success');
+    closeModal('log-activity-modal');
+    if (activityTargetType==='company' && currentCompanyId) loadCompanyTimeline(currentCompanyId);
+    if (activityTargetType==='contact' && currentContactId) loadContactTimeline(currentContactId);
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
+}
+
+async function toggleCompanyActive() {
+  if (!currentCompanyId) return;
+  const c = allCompanies.find(co => co.id === currentCompanyId);
+  if (!c) return;
+  const newActive = c.is_active === false ? true : false;
+  try {
+    await apiPatch(`/companies?id=eq.${currentCompanyId}`, { is_active: newActive });
+    const idx = allCompanies.findIndex(co => co.id === currentCompanyId);
+    if (idx > -1) allCompanies[idx].is_active = newActive;
+    showToast(newActive ? 'Company reactivated' : 'Company deactivated', 'success');
+    closeCompanyPanel();
+    renderCompanies();
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
 }
 
 // ── SUPPLIERS ──
