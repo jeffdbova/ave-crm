@@ -465,9 +465,24 @@
 
       <div class="page" id="page-quotes">
         <div class="card">
-          <div class="card-header"><div class="card-title">Quotes</div></div>
-          <table><thead><tr><th>Quote #</th><th>Company</th><th>Contact</th><th>Spec</th><th>Date</th><th>Price</th><th>Status</th></tr></thead>
-          <tbody id="quotes-tbody"><tr><td colspan="7" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody></table>
+          <div class="card-header">
+            <div class="card-title">Quotes</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select id="quote-status-filter" onchange="loadQuotes()" style="padding:7px 10px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:13px;background:var(--white);color:var(--gray-800);font-family:var(--font-ui)">
+                <option value="">All Statuses</option>
+                <option value="open">Open</option>
+                <option value="ordered">Ordered</option>
+                <option value="lost">Lost</option>
+                <option value="expired">Expired</option>
+              </select>
+              <div class="search-bar" style="min-width:180px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search quotes..." id="quote-search" oninput="loadQuotes()">
+              </div>
+            </div>
+          </div>
+          <table><thead><tr><th>Quote #</th><th>Company</th><th>Contact</th><th>Spec</th><th>Quoted</th><th>Customer Price</th><th>Margin</th><th>Status</th></tr></thead>
+          <tbody id="quotes-tbody"><tr><td colspan="8" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody></table>
         </div>
       </div>
 
@@ -653,6 +668,141 @@
 </div>
 
 <div id="toast-container"></div>
+
+<!-- QUOTE FULL-PAGE MODAL -->
+<div class="modal-overlay" id="quote-modal" style="align-items:flex-start;padding:0;overflow-y:auto">
+  <div style="background:var(--white);width:100%;min-height:100vh;display:flex;flex-direction:column">
+    <div style="background:var(--navy);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="btn-close" onclick="closeQuoteModal()" style="color:white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:white" id="qm-title">New Quote</div>
+          <div style="font-size:12px;color:var(--gray-400)" id="qm-number"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <select id="qm-status" style="padding:7px 12px;border:1px solid var(--navy-light);border-radius:var(--radius);font-size:13px;background:var(--navy-mid);color:white;font-family:var(--font-ui)">
+          <option value="open">Open</option>
+          <option value="ordered">Ordered</option>
+          <option value="lost">Lost</option>
+          <option value="expired">Expired</option>
+        </select>
+        <button class="btn btn-secondary" onclick="generateEmailQuote()" id="qm-email-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Generate Email Quote
+        </button>
+        <button class="btn btn-primary" onclick="saveQuote()">Save Quote</button>
+      </div>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;overflow-y:auto">
+      <!-- LEFT COLUMN: Request + Customer Quote -->
+      <div style="padding:24px;border-right:1px solid var(--gray-200);overflow-y:auto">
+        <!-- Customer Request -->
+        <div style="margin-bottom:24px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--gray-400);margin-bottom:12px;display:flex;align-items:center;gap:8px">Customer Request<div style="flex:1;height:1px;background:var(--gray-200)"></div></div>
+          <div class="field-grid">
+            <div class="field field-full">
+              <label>Company</label>
+              <select id="qm-company" onchange="onQuoteCompanyChange()"></select>
+            </div>
+            <div class="field field-full">
+              <label>Contact</label>
+              <select id="qm-contact"><option value="">— Select Contact —</option></select>
+            </div>
+            <div class="field">
+              <label>Date Requested</label>
+              <input type="date" id="qm-date-requested">
+            </div>
+            <div class="field">
+              <label>Owner</label>
+              <select id="qm-owner"><option value="Jeff">Jeff</option><option value="Salesperson">Salesperson</option></select>
+            </div>
+            <div class="field field-full">
+              <label>Cable Spec / Description</label>
+              <textarea id="qm-spec" rows="3" placeholder="Part number, gauge, insulation type, color, length, etc..."></textarea>
+            </div>
+            <div class="field">
+              <label>Quantity Requested</label>
+              <input type="text" id="qm-quantity" placeholder="e.g. 500ft, 10 reels">
+            </div>
+            <div class="field">
+              <label>Output Type</label>
+              <select id="qm-output-type">
+                <option value="email">Email (CRM generates)</option>
+                <option value="quickbooks">QuickBooks Estimate</option>
+              </select>
+            </div>
+            <div class="field field-full">
+              <label>Application / Notes</label>
+              <textarea id="qm-app-notes" rows="2" placeholder="What is this cable for? Any special requirements?"></textarea>
+            </div>
+          </div>
+        </div>
+        <!-- Customer Quote -->
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--gray-400);margin-bottom:12px;display:flex;align-items:center;gap:8px">Customer Quote<div style="flex:1;height:1px;background:var(--gray-200)"></div></div>
+          <div class="field-grid">
+            <div class="field">
+              <label>Date Quoted</label>
+              <input type="date" id="qm-date-quoted" oninput="calcMargin()">
+            </div>
+            <div class="field">
+              <label>Valid Until</label>
+              <input type="date" id="qm-valid-until" readonly style="background:var(--gray-50)">
+            </div>
+            <div class="field">
+              <label>Customer Price (per unit)</label>
+              <input type="number" id="qm-customer-price" step="0.01" placeholder="0.00" oninput="calcMargin()">
+            </div>
+            <div class="field">
+              <label>Best Supplier Cost</label>
+              <input type="number" id="qm-best-cost" step="0.01" placeholder="0.00" readonly style="background:var(--gray-50)" title="Auto-filled from lowest supplier price">
+            </div>
+          </div>
+          <!-- Margin display -->
+          <div id="qm-margin-display" style="display:none;margin-top:12px;padding:12px 16px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-200)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.5px">Margin</span>
+              <div style="text-align:right">
+                <span style="font-size:18px;font-weight:700;color:var(--navy)" id="qm-margin-pct">—</span>
+                <span style="font-size:13px;color:var(--gray-600);margin-left:8px" id="qm-margin-dollar">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT COLUMN: Supplier Sourcing -->
+      <div style="padding:24px;overflow-y:auto">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--gray-400);margin-bottom:12px;display:flex;align-items:center;gap:8px">Supplier Sourcing<div style="flex:1;height:1px;background:var(--gray-200)"></div></div>
+        <div id="supplier-rows"></div>
+        <button class="btn btn-secondary btn-sm" onclick="addSupplierRow()" id="add-supplier-row-btn" style="margin-top:12px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Supplier
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL QUOTE PREVIEW MODAL -->
+<div class="modal-overlay" id="email-quote-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title">Email Quote</div>
+      <button class="btn-close" onclick="closeModal('email-quote-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px;display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="copyEmailQuote()">Copy to Clipboard</button>
+        <span style="font-size:12px;color:var(--gray-400);align-self:center">Then paste into Outlook</span>
+      </div>
+      <div id="email-quote-content" style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;font-family:Arial,sans-serif;font-size:14px;line-height:1.6;white-space:pre-wrap"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('email-quote-modal')">Close</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── CONFIG ──
@@ -1192,14 +1342,377 @@ async function resolveReviewItem(id) {
 }
 
 // ── QUOTES ──
+// ── PHASE 3: QUOTES ──
+let currentQuoteId = null;
+let supplierRowCount = 0;
+let allSuppliers = [];
+let quoteSupplierRows = [];
+
+async function loadSuppliersList() {
+  try { allSuppliers = await apiGet('/suppliers?order=name.asc&is_active=eq.true') || []; } catch(e) { allSuppliers = []; }
+}
+
 async function loadQuotes() {
   const tbody = document.getElementById('quotes-tbody');
   try {
-    const quotes = await apiGet('/quotes?order=created_at.desc&limit=100') || [];
-    if (!quotes.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400)">No quotes yet</td></tr>'; return; }
+    const statusFilter = document.getElementById('quote-status-filter')?.value || '';
+    const searchQ = (document.getElementById('quote-search')?.value || '').toLowerCase();
+    let path = '/quotes?order=created_at.desc&limit=200';
+    if (statusFilter) path += `&status=eq.${statusFilter}`;
+    let quotes = await apiGet(path) || [];
+    if (searchQ) {
+      quotes = quotes.filter(q => {
+        const co = allCompanies.find(c => c.id === q.company_id);
+        return (co && co.name.toLowerCase().includes(searchQ)) ||
+               (q.quote_number && q.quote_number.toLowerCase().includes(searchQ)) ||
+               (q.spec_description && q.spec_description.toLowerCase().includes(searchQ));
+      });
+    }
+    if (!quotes.length) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-400)">No quotes found</td></tr>`; return; }
     const sc={open:'badge-amber',ordered:'badge-green',lost:'badge-red',expired:'badge-gray'};
-    tbody.innerHTML = quotes.map(q=>{const co=allCompanies.find(c=>c.id===q.company_id),ct=allContacts.find(c=>c.id===q.contact_id);return`<tr><td style="font-family:var(--font-mono);font-size:12px">${q.quote_number||'—'}</td><td>${co?co.name:'—'}</td><td>${ct?`${ct.first_name||''} ${ct.last_name||''}`:'—'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.spec_description||'—'}</td><td style="color:var(--gray-600)">${q.date_quoted||'—'}</td><td style="font-weight:600">${q.customer_price?'$'+Number(q.customer_price).toLocaleString('en-US',{minimumFractionDigits:2}):'—'}</td><td><span class="badge ${sc[q.status]||'badge-gray'}">${q.status}</span></td></tr>`;}).join('');
-  } catch(e) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400)">Could not load quotes</td></tr>'; }
+    tbody.innerHTML = quotes.map(q => {
+      const co = allCompanies.find(c => c.id === q.company_id);
+      const ct = allContacts.find(c => c.id === q.contact_id);
+      let margin = '';
+      if (q.customer_price && q.best_supplier_cost) {
+        const pct = ((q.customer_price - q.best_supplier_cost) / q.customer_price * 100).toFixed(1);
+        margin = `<span style="color:${pct>20?'var(--green)':pct>10?'var(--amber)':'var(--red)'};">${pct}%</span>`;
+      }
+      return `<tr onclick="openQuote('${q.id}')">
+        <td style="font-family:var(--font-mono);font-size:12px;font-weight:600">${q.quote_number||'—'}</td>
+        <td>${co?co.name:'—'}</td>
+        <td style="color:var(--gray-600)">${ct?`${ct.first_name||''} ${ct.last_name||''}`:'—'}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--gray-600)">${q.spec_description||'—'}</td>
+        <td style="color:var(--gray-600);font-size:12px">${q.date_quoted||'—'}</td>
+        <td style="font-weight:600">${q.customer_price?'$'+Number(q.customer_price).toLocaleString('en-US',{minimumFractionDigits:2}):'—'}</td>
+        <td>${margin||'—'}</td>
+        <td><span class="badge ${sc[q.status]||'badge-gray'}">${q.status}</span></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-400)">Could not load quotes</td></tr>`; }
+}
+
+async function openNewQuote(presetCompanyId=null, presetContactId=null) {
+  currentQuoteId = null;
+  supplierRowCount = 0;
+  quoteSupplierRows = [];
+  document.getElementById('qm-title').textContent = 'New Quote';
+  document.getElementById('qm-number').textContent = '';
+  document.getElementById('qm-status').value = 'open';
+  document.getElementById('qm-spec').value = '';
+  document.getElementById('qm-quantity').value = '';
+  document.getElementById('qm-app-notes').value = '';
+  document.getElementById('qm-customer-price').value = '';
+  document.getElementById('qm-best-cost').value = '';
+  document.getElementById('qm-output-type').value = 'email';
+  document.getElementById('qm-owner').value = currentUser?.name?.includes('Jeff') ? 'Jeff' : 'Salesperson';
+  document.getElementById('qm-margin-display').style.display = 'none';
+  document.getElementById('supplier-rows').innerHTML = '';
+
+  // Set dates
+  const today = new Date().toISOString().split('T')[0];
+  const validUntil = new Date(); validUntil.setDate(validUntil.getDate() + 30);
+  document.getElementById('qm-date-requested').value = today;
+  document.getElementById('qm-date-quoted').value = today;
+  document.getElementById('qm-valid-until').value = validUntil.toISOString().split('T')[0];
+
+  if (allSuppliers.length === 0) await loadSuppliersList();
+  populateCompanyDropdown('qm-company', presetCompanyId);
+  if (presetCompanyId) onQuoteCompanyChange(presetContactId);
+
+  addSupplierRow();
+  document.getElementById('quote-modal').classList.add('open');
+}
+
+async function openQuote(id) {
+  currentQuoteId = id;
+  supplierRowCount = 0;
+  quoteSupplierRows = [];
+  if (allSuppliers.length === 0) await loadSuppliersList();
+
+  try {
+    const quotes = await apiGet(`/quotes?id=eq.${id}`) || [];
+    const q = quotes[0];
+    if (!q) return;
+
+    document.getElementById('qm-title').textContent = 'Edit Quote';
+    document.getElementById('qm-number').textContent = q.quote_number || '';
+    document.getElementById('qm-status').value = q.status || 'open';
+    document.getElementById('qm-spec').value = q.spec_description || '';
+    document.getElementById('qm-quantity').value = q.quantity || '';
+    document.getElementById('qm-app-notes').value = q.application_notes || '';
+    document.getElementById('qm-customer-price').value = q.customer_price || '';
+    document.getElementById('qm-best-cost').value = q.best_supplier_cost || '';
+    document.getElementById('qm-output-type').value = q.output_type || 'email';
+    document.getElementById('qm-owner').value = q.owner || 'Jeff';
+    document.getElementById('qm-date-requested').value = q.date_requested || '';
+    document.getElementById('qm-date-quoted').value = q.date_quoted || '';
+    document.getElementById('qm-valid-until').value = q.valid_until || '';
+
+    populateCompanyDropdown('qm-company', q.company_id);
+    if (q.company_id) await onQuoteCompanyChange(q.contact_id);
+
+    calcMargin();
+
+    // Load supplier rows
+    const supplierLines = await apiGet(`/quote_suppliers?quote_id=eq.${id}&order=created_at.asc`) || [];
+    document.getElementById('supplier-rows').innerHTML = '';
+    if (supplierLines.length) {
+      for (const line of supplierLines) { addSupplierRow(line); }
+    } else {
+      addSupplierRow();
+    }
+
+    document.getElementById('quote-modal').classList.add('open');
+  } catch(e) { showToast('Could not load quote: '+e.message, 'error'); }
+}
+
+function closeQuoteModal() {
+  document.getElementById('quote-modal').classList.remove('open');
+  currentQuoteId = null;
+}
+
+function onQuoteCompanyChange(presetContactId=null) {
+  const companyId = document.getElementById('qm-company').value;
+  const contacts = allContacts.filter(c => c.company_id === companyId);
+  const sel = document.getElementById('qm-contact');
+  sel.innerHTML = '<option value="">— Select Contact —</option>' +
+    contacts.map(c => `<option value="${c.id}" ${c.id===presetContactId?'selected':''}>${c.first_name||''} ${c.last_name||''}</option>`).join('');
+}
+
+function addSupplierRow(data=null) {
+  if (supplierRowCount >= 5) { showToast('Maximum 5 suppliers per quote', 'error'); return; }
+  const idx = supplierRowCount++;
+  const supplierId = data?.supplier_id || '';
+  const supplierOptions = allSuppliers.map(s => `<option value="${s.id}" ${s.id===supplierId?'selected':''}>${s.name}</option>`).join('');
+  const row = document.createElement('div');
+  row.id = `supplier-row-${idx}`;
+  row.style.cssText = 'background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:12px;position:relative';
+  row.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px">Supplier ${idx+1}</div>
+      ${idx>0?`<button onclick="removeSupplierRow(${idx})" style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:18px;padding:0;line-height:1">&times;</button>`:''}
+    </div>
+    <div class="field-grid">
+      <div class="field field-full">
+        <label>Supplier</label>
+        <select id="sr-supplier-${idx}" onchange="updateBestCost()"><option value="">— Select Supplier —</option>${supplierOptions}</select>
+      </div>
+      <div class="field"><label>Their Part #</label><input type="text" id="sr-partnum-${idx}" value="${data?.supplier_part_number||''}"></div>
+      <div class="field"><label>Unit Price</label><input type="number" id="sr-price-${idx}" step="0.01" placeholder="0.00" value="${data?.unit_price||''}" oninput="updateBestCost()"></div>
+      <div class="field"><label>Min Order Qty</label><input type="text" id="sr-moq-${idx}" value="${data?.moq||''}"></div>
+      <div class="field"><label>Stock / Lead Time</label><input type="text" id="sr-stock-${idx}" value="${data?.stock_status||''}" placeholder="In stock / 2 weeks"></div>
+      <div class="field"><label>Quote Expiry</label><input type="date" id="sr-expiry-${idx}" value="${data?.quote_expiry||''}"></div>
+      <div class="field"><label>Contact Method</label>
+        <select id="sr-method-${idx}">
+          <option value="phone" ${data?.contact_method==='phone'?'selected':''}>Phone</option>
+          <option value="email" ${data?.contact_method==='email'?'selected':''}>Email</option>
+          <option value="portal" ${data?.contact_method==='portal'?'selected':''}>Portal</option>
+        </select>
+      </div>
+      <div class="field"><label>Lead Time</label><input type="text" id="sr-leadtime-${idx}" value="${data?.lead_time||''}" placeholder="e.g. 3-5 days"></div>
+      <div class="field field-full"><label>Notes</label><input type="text" id="sr-notes-${idx}" value="${data?.notes||''}" placeholder="Any additional details..."></div>
+    </div>`;
+  if (data) row.dataset.supplierLineId = data.id;
+  document.getElementById('supplier-rows').appendChild(row);
+  // Update add button visibility
+  document.getElementById('add-supplier-row-btn').style.display = supplierRowCount >= 5 ? 'none' : 'inline-flex';
+}
+
+function removeSupplierRow(idx) {
+  const row = document.getElementById(`supplier-row-${idx}`);
+  if (row) row.remove();
+  supplierRowCount--;
+  document.getElementById('add-supplier-row-btn').style.display = supplierRowCount >= 5 ? 'none' : 'inline-flex';
+  updateBestCost();
+}
+
+function updateBestCost() {
+  let best = null;
+  for (let i = 0; i < 5; i++) {
+    const el = document.getElementById(`sr-price-${i}`);
+    if (el && el.value) {
+      const v = parseFloat(el.value);
+      if (!isNaN(v) && (best === null || v < best)) best = v;
+    }
+  }
+  const bestCostEl = document.getElementById('qm-best-cost');
+  if (best !== null) { bestCostEl.value = best.toFixed(2); } else { bestCostEl.value = ''; }
+  calcMargin();
+}
+
+function calcMargin() {
+  const price = parseFloat(document.getElementById('qm-customer-price').value);
+  const cost = parseFloat(document.getElementById('qm-best-cost').value);
+  const display = document.getElementById('qm-margin-display');
+  if (!isNaN(price) && !isNaN(cost) && price > 0) {
+    const dollarMargin = price - cost;
+    const pctMargin = (dollarMargin / price * 100).toFixed(1);
+    const color = pctMargin > 20 ? 'var(--green)' : pctMargin > 10 ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('qm-margin-pct').innerHTML = `<span style="color:${color}">${pctMargin}%</span>`;
+    document.getElementById('qm-margin-dollar').textContent = `$${dollarMargin.toFixed(2)} per unit`;
+    display.style.display = 'block';
+  } else {
+    display.style.display = 'none';
+  }
+  // Auto-update valid until when date quoted changes
+  const dateQuoted = document.getElementById('qm-date-quoted').value;
+  if (dateQuoted) {
+    const validUntil = new Date(dateQuoted);
+    validUntil.setDate(validUntil.getDate() + 30);
+    document.getElementById('qm-valid-until').value = validUntil.toISOString().split('T')[0];
+  }
+}
+
+async function saveQuote() {
+  const spec = document.getElementById('qm-spec').value.trim();
+  const companyId = document.getElementById('qm-company').value;
+  if (!spec) { showToast('Cable spec is required', 'error'); return; }
+  if (!companyId) { showToast('Company is required', 'error'); return; }
+
+  const customerPrice = parseFloat(document.getElementById('qm-customer-price').value) || null;
+  const bestCost = parseFloat(document.getElementById('qm-best-cost').value) || null;
+
+  const body = {
+    company_id: companyId,
+    contact_id: document.getElementById('qm-contact').value || null,
+    spec_description: spec,
+    quantity: document.getElementById('qm-quantity').value.trim(),
+    application_notes: document.getElementById('qm-app-notes').value.trim(),
+    date_requested: document.getElementById('qm-date-requested').value || null,
+    date_quoted: document.getElementById('qm-date-quoted').value || null,
+    valid_until: document.getElementById('qm-valid-until').value || null,
+    customer_price: customerPrice,
+    best_supplier_cost: bestCost,
+    output_type: document.getElementById('qm-output-type').value,
+    owner: document.getElementById('qm-owner').value,
+    status: document.getElementById('qm-status').value
+  };
+
+  try {
+    let quoteId = currentQuoteId;
+    if (!currentQuoteId) {
+      // Get next quote number
+      const existing = await apiGet('/quotes?select=quote_number&order=created_at.desc&limit=1') || [];
+      let nextNum = 1;
+      if (existing.length && existing[0].quote_number) {
+        const match = existing[0].quote_number.match(/(\d+)$/);
+        if (match) nextNum = parseInt(match[1]) + 1;
+      }
+      body.quote_number = `AVE-Q-${String(nextNum).padStart(4,'0')}`;
+      const result = await apiPost('/quotes', body);
+      if (result?.[0]) quoteId = result[0].id;
+    } else {
+      await apiPatch(`/quotes?id=eq.${currentQuoteId}`, body);
+    }
+
+    // Save supplier rows
+    if (quoteId) {
+      // Delete existing supplier lines and re-save
+      if (currentQuoteId) {
+        await api(`/quote_suppliers?quote_id=eq.${quoteId}`, { method: 'DELETE' });
+      }
+      for (let i = 0; i < 5; i++) {
+        const supplierEl = document.getElementById(`sr-supplier-${i}`);
+        if (!supplierEl) continue;
+        const supplierId = supplierEl.value;
+        if (!supplierId) continue;
+        const unitPrice = parseFloat(document.getElementById(`sr-price-${i}`)?.value) || null;
+        const moqVal = document.getElementById(`sr-moq-${i}`)?.value.trim();
+        await apiPost('/quote_suppliers', {
+          quote_id: quoteId,
+          supplier_id: supplierId,
+          supplier_part_number: document.getElementById(`sr-partnum-${i}`)?.value.trim() || null,
+          unit_price: unitPrice,
+          moq: moqVal ? parseInt(moqVal) || null : null,
+          stock_status: document.getElementById(`sr-stock-${i}`)?.value.trim() || null,
+          lead_time: document.getElementById(`sr-leadtime-${i}`)?.value.trim() || null,
+          quote_expiry: document.getElementById(`sr-expiry-${i}`)?.value || null,
+          contact_method: document.getElementById(`sr-method-${i}`)?.value || null,
+          notes: document.getElementById(`sr-notes-${i}`)?.value.trim() || null
+        });
+      }
+
+      // Log activity on company timeline
+      const co = allCompanies.find(c => c.id === companyId);
+      await apiPost('/activities', {
+        type: 'quote',
+        company_id: companyId,
+        contact_id: document.getElementById('qm-contact').value || null,
+        summary: `Quote ${body.quote_number||'updated'}: ${spec.substring(0,60)}`,
+        source: 'manual',
+        logged_by: currentUser?.name || 'Unknown',
+        occurred_at: new Date().toISOString()
+      });
+    }
+
+    showToast(currentQuoteId ? 'Quote updated' : 'Quote created', 'success');
+    currentQuoteId = quoteId;
+    document.getElementById('qm-number').textContent = body.quote_number || '';
+    loadQuotes();
+  } catch(e) { showToast('Error saving quote: '+e.message, 'error'); }
+}
+
+function generateEmailQuote() {
+  const company = allCompanies.find(c => c.id === document.getElementById('qm-company').value);
+  const contactId = document.getElementById('qm-contact').value;
+  const contact = allContacts.find(c => c.id === contactId);
+  const quoteNum = document.getElementById('qm-number').textContent || 'PENDING';
+  const spec = document.getElementById('qm-spec').value.trim();
+  const qty = document.getElementById('qm-quantity').value.trim();
+  const price = parseFloat(document.getElementById('qm-customer-price').value);
+  const validUntil = document.getElementById('qm-valid-until').value;
+  const appNotes = document.getElementById('qm-app-notes').value.trim();
+
+  if (!spec || !company) { showToast('Please fill in company and cable spec first', 'error'); return; }
+  if (!price) { showToast('Please enter a customer price first', 'error'); return; }
+
+  const contactName = contact ? `${contact.first_name||''} ${contact.last_name||''}`.trim() : '';
+  const greeting = contactName ? `Hi ${contactName.split(' ')[0]},` : `Hi,`;
+  const validStr = validUntil ? new Date(validUntil).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '30 days from today';
+
+  const emailText = `${greeting}
+
+Thank you for your inquiry. Please find our quotation below:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUOTATION ${quoteNum}
+Audio Video Electric
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Customer: ${company.name}
+Date: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}
+
+SPECIFICATION:
+${spec}
+${qty ? `
+Quantity: ${qty}` : ''}${appNotes ? `
+Application: ${appNotes}` : ''}
+
+PRICING:
+Unit Price: $${price.toLocaleString('en-US',{minimumFractionDigits:2})}${qty ? `
+Quantity: ${qty}` : ''}
+
+This quotation is valid through ${validStr}.
+
+Please don't hesitate to reach out with any questions. We look forward to earning your business.
+
+Best regards,
+${currentUser?.name || 'Audio Video Electric'}
+Audio Video Electric
+audiovideoelectric.com`;
+
+  document.getElementById('email-quote-content').textContent = emailText;
+  document.getElementById('email-quote-modal').classList.add('open');
+}
+
+function copyEmailQuote() {
+  const text = document.getElementById('email-quote-content').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copied to clipboard', 'success');
+  }).catch(() => {
+    showToast('Please select and copy manually', 'error');
+  });
 }
 
 // ── HELPERS ──
@@ -1247,7 +1760,15 @@ function showPage(page) {
   if(page==='contacts'){renderContacts();const b=document.createElement('button');b.className='btn btn-primary';b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Contact`;b.onclick=()=>openAddContactModal();actions.appendChild(b);}
   if(page==='suppliers'){loadSuppliers();const b=document.createElement('button');b.className='btn btn-primary';b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Supplier`;b.onclick=openAddSupplierModal;actions.appendChild(b);}
   if(page==='review') loadReview();
-  if(page==='quotes') loadQuotes();
+  if(page==='quotes') {
+    loadQuotes();
+    if (allSuppliers.length === 0) loadSuppliersList();
+    const b=document.createElement('button');
+    b.className='btn btn-primary';
+    b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Quote`;
+    b.onclick=()=>openNewQuote();
+    actions.appendChild(b);
+  }
 }
 
 window.addEventListener('DOMContentLoaded', checkAuth);
